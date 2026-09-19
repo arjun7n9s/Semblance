@@ -144,11 +144,7 @@ button {
   color: var(--paper);
   padding: 8px 10px;
   cursor: pointer;
-}
-
-button.ghost {
-  background: transparent;
-  color: var(--ink);
+  white-space: normal;
 }
 
 #understand {
@@ -156,16 +152,25 @@ button.ghost {
   text-align: left;
   background: transparent;
   color: var(--ink);
+  overflow-wrap: anywhere;
+  line-height: 1.35;
 }
 
 .revoke button {
   text-align: left;
   font-weight: 650;
+  overflow-wrap: anywhere;
 }
 
 .status {
   min-height: 1.3em;
   margin: 8px 0 0;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+button.ghost {
+  background: transparent;
   color: var(--ink);
 }
 
