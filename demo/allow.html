@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Semblance · Beat B · FAKE allow</title>
+    <link rel="stylesheet" href="allow.css" />
+  </head>
+  <body data-semblance-beat="allow">
+    <aside class="fake-banner" role="alert">
+      <strong>FAKE — not Google/Microsoft</strong>
+      <span>This is Semblance theater. A real consent screen can steal the account without a second factor.</span>
+    </aside>
+
+    <main class="frame">
+      <p class="prop-note">Prop consent card. No identity provider is involved.</p>
+      <section class="card">
+        <header class="chooser">
+          <div class="gmark" aria-hidden="true">G</div>
+          <div>
+            <p class="app">LabQueue wants access to your account</p>
+            <p class="who">signed in as you@school.edu</p>
+          </div>
+        </header>
+
+        <ul class="scopes">
+          <li data-scope="gmail.readonly">
+            <code>gmail.readonly</code>
+            <p>Can read every email in this inbox, including password resets and school mail.</p>
+          </li>
+          <li data-scope="drive">
+            <code>drive</code>
+            <p>Can open and change files in Drive — homework, IDs, shared folders.</p>
+          </li>
+          <li data-scope="contacts">
+            <code>contacts</code>
+            <p>Can read and change your contacts — your friends become their list.</p>
+          </li>
+          <li data-scope="offline_access">
+            <code>offline_access</code>
+            <p>Keeps access after you close the tab — until you revoke it. This is the long leash.</p>
+          </li>
+        </ul>
+
+        <p class="fine">
+          The friend chat said this was normal. It is not. MFA never runs on this click.
+        </p>
+
+        <div class="actions">
+          <button id="deny-btn" class="ghost" type="button">Deny</button>
+          <button id="allow-btn" type="button">Allow</button>
+        </div>
+      </section>
+
+      <section id="aftermath" class="aftermath" hidden>
+        <h1>That click would have been the login.</h1>
+        <p>
+          Nothing left this machine. In a real Allow, LabQueue would already hold mail, Drive, and a
+          refresh token. Open the Semblance toolbar popup for Beat C — the coach that stays useful
+          after the theater.
+        </p>
+        <p class="after-actions">
+          <a href="../popup/popup.html">Open the coach in a tab</a>
+          <a href="lure.html">Replay Beat A</a>
+        </p>
+      </section>
+    </main>
+
+    <script src="../shared/scopes.js"></script>
+    <script src="../shared/rituals.js"></script>
+    <script src="../shared/storage.js"></script>
+    <script src="../shared/ladder.js"></script>
+    <script src="../content/demo-coach.js"></script>
+    <script src="allow.js"></script>
+  </body>
+</html>

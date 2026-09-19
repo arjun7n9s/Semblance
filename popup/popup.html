@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Semblance</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="mast">
+      <p class="eyebrow">Semblance</p>
+      <h1>Allow is the login.</h1>
+      <p class="lede" id="lede">
+        MFA never got a vote. Read the scopes, verify the friend, revoke if you were wrong.
+      </p>
+    </header>
+
+    <section class="panel" id="beat-c" hidden>
+      <p class="kicker">Beat C · coach</p>
+      <p>You left a fake Allow. The real one looks quieter. Use the tools below anytime — the demo is optional.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Friend verify</h2>
+      <p>
+        A shared word lives in this browser only. No server. No parent ping. Or skip it and own the click.
+      </p>
+      <label for="friend-word">Shared word</label>
+      <div class="row">
+        <input id="friend-word" type="text" autocomplete="off" spellcheck="false" />
+        <button id="save-word" type="button">Save</button>
+      </div>
+      <button id="understand" class="ghost" type="button">I understand — Allow would have been the breach</button>
+      <p class="status" id="gate-status" role="status"></p>
+    </section>
+
+    <section class="panel">
+      <h2>Scope coach</h2>
+      <p>Fifteen common OAuth scopes, one teen-readable sentence each.</p>
+      <label for="scope-query">Find a scope</label>
+      <input id="scope-query" type="search" placeholder="gmail, Mail.Send, drive…" />
+      <ol id="scope-list"></ol>
+    </section>
+
+    <section class="panel">
+      <h2>Paste ritual</h2>
+      <p>
+        Paste a URL or a chat line. Semblance only checks local regex rules. The paste is not stored.
+      </p>
+      <label for="ritual-input">URL or message</label>
+      <textarea id="ritual-input" rows="4" placeholder="http://localhost:4173/callback?code=…"></textarea>
+      <button id="ritual-check" type="button">Check this paste</button>
+      <ul id="ritual-hits"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>Revoke</h2>
+      <p>One tap to the real connected-apps pages. Sign in there if Chrome asks.</p>
+      <div class="stack">
+        <button id="revoke-google" type="button">Google connected apps</button>
+        <button id="revoke-microsoft" type="button">Microsoft app access</button>
+        <button id="revoke-microsoft-work" class="ghost" type="button">Microsoft work / school consent</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Three-beat theater</h2>
+      <p>Optional scripted lure, then the FAKE allow screen. Keep Semblance for the coach either way.</p>
+      <div class="stack">
+        <button id="open-lure" type="button">Open Beat A · friend lure</button>
+        <button id="open-allow" class="ghost" type="button">Open Beat B · fake Allow</button>
+      </div>
+    </section>
+
+    <section class="panel quiet">
+      <h2>Reason log</h2>
+      <p>Metadata only — time, level, reason. No page text, no tokens.</p>
+      <ul id="reason-log"></ul>
+    </section>
+
+    <script src="../shared/scopes.js"></script>
+    <script src="../shared/rituals.js"></script>
+    <script src="../shared/storage.js"></script>
+    <script src="../shared/ladder.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
