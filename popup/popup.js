@@ -19,17 +19,12 @@
   }
 
   function openTab(url) {
-    if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
-      chrome.runtime.sendMessage({ type: "semblance:open", url: url }, function () {
-        var failed = typeof chrome.runtime.lastError !== "undefined" && chrome.runtime.lastError;
-        if (failed && chrome.tabs && chrome.tabs.create) {
-          chrome.tabs.create({ url: url });
-        }
-      });
-      return;
-    }
     if (typeof chrome !== "undefined" && chrome.tabs && chrome.tabs.create) {
       chrome.tabs.create({ url: url });
+      return;
+    }
+    if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
+      chrome.runtime.sendMessage({ type: "semblance:open", url: url });
       return;
     }
     window.open(url, "_blank", "noopener");

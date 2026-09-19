@@ -171,8 +171,8 @@ const popupJs = read("popup/popup.js");
 if (!/chrome\.runtime\.getURL/.test(popupJs) || !/demo\/lure\.html/.test(popupJs) || !/demo\/allow\.html/.test(popupJs)) {
   errors.push("popup must open demo pages via chrome.runtime.getURL");
 }
-if (!/semblance:open/.test(popupJs)) {
-  errors.push("popup should open tabs through the service worker");
+if (!/chrome\.tabs\.create/.test(popupJs) && !/semblance:open/.test(popupJs)) {
+  errors.push("popup must open chrome-extension demo tabs from the toolbar");
 }
 
 const demoCoach = read("content/demo-coach.js");
