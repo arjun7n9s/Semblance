@@ -74,7 +74,7 @@
   if (typeof SemblanceRemind !== "undefined" && SemblanceRemind.read) {
     SemblanceRemind.read().then(function (state) {
       var cue = $("remind-cue");
-      if (!cue || !state.cue) {
+      if (!cue || !(state.cue || (state.firedAt && !state.on))) {
         return;
       }
       cue.hidden = false;

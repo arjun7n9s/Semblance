@@ -383,6 +383,16 @@
     });
   }
 
+  function clearFocus() {
+    return read().then(function (state) {
+      if (!state.focusCoach) {
+        return state;
+      }
+      state.focusCoach = false;
+      return write(state);
+    });
+  }
+
   function ensureAlarm() {
     return read().then(function (state) {
       if (!state.on || !state.fireAt || state.fireAt <= Date.now()) {
@@ -479,6 +489,7 @@
     schedule: schedule,
     cancel: cancel,
     acknowledgeCue: acknowledgeCue,
+    clearFocus: clearFocus,
     ensureAlarm: ensureAlarm,
     onAlarm: onAlarm,
     onNotificationClicked: onNotificationClicked,

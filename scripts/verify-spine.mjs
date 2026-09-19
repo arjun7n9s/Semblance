@@ -665,8 +665,14 @@ if (!panelHtml.includes('id="revoke-checkin"') || !panelHtml.includes('id="remin
 if (!/Default off/.test(panelHtml) || !/Reminder only/.test(panelHtml) || !/does not watch your accounts/.test(panelHtml)) {
   errors.push("side panel check-in must default off and deny monitoring");
 }
-if (!panelHtml.includes("../shared/remind.js")) {
-  errors.push("side panel must load remind.js");
+if (!/SemblanceRemind\.clearFocus/.test(panelJs)) {
+  errors.push("side panel may scroll to a due reminder but must not swallow the cue");
+}
+if (/acknowledgeCue/.test(panelJs)) {
+  errors.push("side panel must not auto-clear the reminder cue — Turn off or the notification click does that");
+}
+if (!/remind-cue/.test(popupHtml) || !/firedAt/.test(popupJs)) {
+  errors.push("popup must show a fired check-in cue so the toolbar badge has a path into the coach");
 }
 if (popupHtml.includes('id="remind-when"') || popupHtml.includes('id="remind-on"') || popupHtml.includes('id="remind-off"')) {
   errors.push("popup must stay a thin launcher — check-in lives in the side panel");

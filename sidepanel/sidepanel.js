@@ -158,12 +158,12 @@
         offBtn.disabled = !state.on && !state.cue && !state.firedAt;
       }
       status.textContent = SemblanceRemind.statusText(state);
-      if (state.cue || state.focusCoach) {
+      if (state.focusCoach) {
         var section = $("revoke-checkin");
         if (section && typeof section.scrollIntoView === "function") {
           section.scrollIntoView({ block: "nearest" });
         }
-        SemblanceRemind.acknowledgeCue();
+        SemblanceRemind.clearFocus();
       }
       SemblanceRemind.ensureAlarm();
     });
