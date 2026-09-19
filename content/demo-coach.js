@@ -67,7 +67,7 @@
       kind === "hard-stop" ? "That Allow is the login." : "Pause. Read this before Allow.";
     var body =
       kind === "hard-stop"
-        ? "MFA never ran. The click is the whole grant. Type the shared word from the popup, or tap I understand — this browser only, no ping."
+        ? "MFA never ran. The click is the whole grant. Type the shared word from the side panel, or tap I understand — this browser only, no ping."
         : "These permissions are written in jargon so they look normal. Semblance translates them. Confirm with the shared word, or say you understand.";
 
     if (beat === "allow") {
@@ -111,7 +111,7 @@
       }
       SemblanceStore.checkFriendWord(input.value).then(function (ok) {
         if (!ok) {
-          note.textContent = "No match. Save the word in the Semblance popup, then type it here.";
+          note.textContent = "No match. Save the word in the Semblance side panel, then type it here.";
           return;
         }
         finish("Friend word matches. The gate is open in this browser.");
@@ -190,7 +190,7 @@
     var chip = document.querySelector(".semblance-chip p");
     if (chip) {
       chip.textContent =
-        "Still closed. Friend-verify or I understand in the popup — then Allow.";
+        "Still closed. Friend-verify or I understand in the side panel — then Allow.";
     }
     var existing = document.querySelector(".semblance-quiet");
     if (existing) {
@@ -216,7 +216,7 @@
   } else {
     mountChip(
       "Semblance · Beat B",
-      "FAKE allow screen — not Google, not Microsoft. Open the toolbar popup after you deal with the gate."
+      "FAKE allow screen — not Google, not Microsoft. The keep-installed coach is the side panel, not this page."
     );
     bindAllow();
     if (window.SemblanceLadder) {

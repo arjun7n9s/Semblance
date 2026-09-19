@@ -21,7 +21,7 @@
     if (fromDeny) {
       aftermath.querySelector("h1").textContent = "Deny is the right muscle.";
       aftermath.querySelector("p").textContent =
-        "You left without granting mail, Drive, contacts, or a long-lived grant. Open the Semblance popup anyway — Beat C is the coach you keep.";
+        "You left without granting mail, Drive, contacts, or a long-lived grant. Open the Semblance side panel anyway — that coach is the part you keep.";
     }
     if (window.SemblanceStore && SemblanceStore.available()) {
       SemblanceStore.setDemoBeat("coach");

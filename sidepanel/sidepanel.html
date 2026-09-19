@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Semblance</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <header class="mast">
+      <p class="eyebrow">Semblance · beside the tab</p>
+      <h1>Allow is the login.</h1>
+      <p class="lede" id="lede">
+        A chat can hand you a consent screen. MFA never runs on Allow. Leave this
+        panel open. You do not need the demo pages.
+      </p>
+    </header>
+
+    <section class="panel now" id="beat-c" hidden>
+      <p class="kicker">You already walked the labeled FAKE Allow</p>
+      <p>
+        Theater is over. The tools below are the part worth keeping installed —
+        they never needed those demo tabs.
+      </p>
+    </section>
+
+    <section class="panel now">
+      <h2>Use this now</h2>
+      <p>
+        Someone asked you to click Allow, paste a code, or keep an app you already
+        granted. Read the scopes. Verify a person in the room — or own the click.
+        Check a paste before you open it. Revoke if you already allowed. Nothing
+        here talks to Google or Microsoft login. Real Allow screens stay untouched.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>Scope coach</h2>
+      <p>Common Google and Microsoft OAuth scopes, one plain sentence each.</p>
+      <label for="scope-query">Find a scope</label>
+      <input id="scope-query" type="search" placeholder="gmail, Mail.Send, drive…" />
+      <ol id="scope-list"></ol>
+    </section>
+
+    <section class="panel">
+      <h2>Friend verify</h2>
+      <p>
+        Before you click Allow, check that the person is actually in the room.
+        Save a shared word, then type it here. Or tap I understand. This browser
+        only. No server. No ping. This does not freeze a live login page — it is a
+        pause you take.
+      </p>
+
+      <div class="choice">
+        <p class="choice-kicker">Shared word</p>
+        <p>Save a word together, then type it here. A real person in the room — not a chat message.</p>
+        <label for="friend-word">Save a shared word</label>
+        <div class="row">
+          <input id="friend-word" type="text" autocomplete="off" spellcheck="false" />
+          <button id="save-word" type="button">Save word</button>
+        </div>
+        <label for="friend-check">Type it to verify</label>
+        <div class="row">
+          <input id="friend-check" type="text" autocomplete="off" spellcheck="false" />
+          <button id="check-word" type="button">Verify</button>
+        </div>
+      </div>
+
+      <div class="choice">
+        <p class="choice-kicker">Or own the click</p>
+        <button id="understand" type="button">I understand — Allow would have been the breach</button>
+      </div>
+      <p class="status" id="gate-status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel">
+      <h2>Paste ritual</h2>
+      <p>
+        Paste a URL or a chat line. Semblance only checks local regex rules. The paste is not stored.
+      </p>
+      <label for="ritual-input">URL or message</label>
+      <textarea id="ritual-input" rows="4" placeholder="http://localhost:4173/callback?code=…"></textarea>
+      <button id="ritual-check" type="button">Check this paste</button>
+      <p class="status" id="ritual-status" role="status" aria-live="polite"></p>
+      <ul id="ritual-hits"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>Revoke</h2>
+      <p>Official connected-apps pages. Sign in there if Chrome asks. Semblance does not revoke for you.</p>
+      <div class="stack revoke">
+        <button id="revoke-google" type="button">Open Google connected apps</button>
+        <button id="revoke-microsoft" type="button">Open Microsoft app access</button>
+        <button id="revoke-microsoft-work" class="ghost" type="button">Open Microsoft work / school consent</button>
+      </div>
+    </section>
+
+    <section class="panel quiet">
+      <h2>Reason log</h2>
+      <p>Metadata only — time, level, reason. No page text, no tokens.</p>
+      <ul id="reason-log"></ul>
+    </section>
+
+    <p class="foot">
+      Labeled FAKE walkthrough lives in the toolbar popup. You do not need it to use this coach.
+    </p>
+
+    <script src="../shared/scopes.js"></script>
+    <script src="../shared/rituals.js"></script>
+    <script src="../shared/storage.js"></script>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>

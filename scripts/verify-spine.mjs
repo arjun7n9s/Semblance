@@ -79,14 +79,21 @@ if (manifest.manifest_version !== 3) {
 if (!manifest.action?.default_popup) {
   errors.push("popup missing");
 }
-if (!Array.isArray(manifest.permissions) || manifest.permissions.join() !== "storage") {
-  errors.push("permissions must be storage only");
+if (manifest.side_panel?.default_path !== "sidepanel/sidepanel.html") {
+  errors.push("side_panel.default_path must be sidepanel/sidepanel.html");
+}
+const perms = Array.isArray(manifest.permissions) ? manifest.permissions.slice().sort() : [];
+if (perms.join() !== "sidePanel,storage") {
+  errors.push("permissions must be storage and sidePanel only");
 }
 if (manifest.host_permissions?.length) {
   errors.push("no host_permissions on the spine");
 }
 if (manifest.web_accessible_resources) {
   errors.push("web_accessible_resources not needed for popup chrome-extension:// demo tabs");
+}
+if (manifest.declarative_net_request || (manifest.permissions || []).includes("declarativeNetRequest")) {
+  errors.push("no DNR hero on the spine");
 }
 
 const forbiddenHosts = /accounts\.google\.com|login\.microsoftonline\.com|login\.live\.com/;
@@ -248,6 +255,9 @@ if (!/SemblanceScopes\.findByRaw/.test(allowJs) || !/data-scope/.test(allowJs)) 
 
 const popupHtml = read("popup/popup.html");
 const popupJs = read("popup/popup.js");
+const panelHtml = read("sidepanel/sidepanel.html");
+const panelJs = read("sidepanel/sidepanel.js");
+
 if (!/chrome\.runtime\.getURL/.test(popupJs) || !/demo\/lure\.html/.test(popupJs) || !/demo\/allow\.html/.test(popupJs)) {
   errors.push("popup must open demo pages via chrome.runtime.getURL");
 }
@@ -255,25 +265,51 @@ if (!/chrome\.tabs\.create/.test(popupJs) && !/semblance:open/.test(popupJs)) {
   errors.push("popup must open chrome-extension demo tabs from the toolbar");
 }
 if (popupHtml.includes("demo-coach") || popupHtml.includes("demo/")) {
-  errors.push("popup html must not load demo pages — keep-installed stands alone");
+  errors.push("popup html must not load demo pages — launcher is not theater");
 }
-if (!popupHtml.includes('id="check-word"') || !/checkFriendWord/.test(popupJs)) {
-  errors.push("popup must friend-verify without opening demo pages");
+if (!popupHtml.includes('id="open-panel"') || !/sidePanel\.open/.test(popupJs)) {
+  errors.push("popup must open the side panel as the keep-installed coach");
 }
-if (!popupHtml.includes('id="ritual-input"') || !popupHtml.includes("revoke-google")) {
-  errors.push("popup keep-installed must include paste ritual and revoke");
+if (!/windows\.getCurrent/.test(popupJs)) {
+  errors.push("popup must cache windowId before the click so sidePanel.open stays a user gesture");
 }
-const understandChunk = (popupJs.split('$("understand")')[1] || "").split('$("ritual-check")')[0];
+if (popupHtml.includes('id="ritual-input"') || popupHtml.includes('id="scope-list"') || popupHtml.includes("revoke-google")) {
+  errors.push("popup must stay a thin launcher — keep-installed tools live in the side panel");
+}
+if (!popupHtml.includes('id="open-lure"') || !popupHtml.includes('id="open-allow"')) {
+  errors.push("popup must still launch Beat A and Beat B");
+}
+
+if (panelHtml.includes("demo-coach") || panelHtml.includes("demo/") || panelHtml.includes("open-lure") || panelHtml.includes("open-allow")) {
+  errors.push("side panel must not be a second theater stage");
+}
+if (!/You do not need the demo pages/.test(panelHtml) || !/Use this now/.test(panelHtml)) {
+  errors.push("side panel must make sense with demo tabs closed (stranger-bar copy)");
+}
+if (!panelHtml.includes('id="check-word"') || !/checkFriendWord/.test(panelJs)) {
+  errors.push("side panel must friend-verify without opening demo pages");
+}
+if (!panelHtml.includes('id="ritual-input"') || !panelHtml.includes("revoke-google") || !panelHtml.includes('id="scope-list"')) {
+  errors.push("side panel keep-installed must include scope coach, paste ritual, and revoke");
+}
+const hiddenBeat = panelHtml.match(/id="beat-c"[^>]*hidden[\s\S]*?<\/section>/);
+if (hiddenBeat && /scope-list|ritual-input|check-word|revoke-google/.test(hiddenBeat[0])) {
+  errors.push("keep-installed tools must not start hidden behind theater");
+}
+if (/demo\/(?:lure|allow)\.html/.test(panelJs) || /setDemoBeat/.test(panelJs)) {
+  errors.push("side panel must not drive theater beats");
+}
+const understandChunk = (panelJs.split('$("understand")')[1] || "").split('$("ritual-check")')[0];
 if (/setDemoBeat/.test(understandChunk)) {
   errors.push("I understand must not mark demoBeat — keep-installed is not theater");
 }
-if (!popupJs.includes("https://myaccount.google.com/connections")) {
+if (!panelJs.includes("https://myaccount.google.com/connections")) {
   errors.push("Google revoke link missing");
 }
-if (!popupJs.includes("https://account.microsoft.com/privacy/app-access")) {
+if (!panelJs.includes("https://account.microsoft.com/privacy/app-access")) {
   errors.push("Microsoft revoke link missing");
 }
-if (!popupJs.includes("https://myaccount.microsoft.com/consent")) {
+if (!panelJs.includes("https://myaccount.microsoft.com/consent")) {
   errors.push("Microsoft work revoke link missing");
 }
 
@@ -293,20 +329,26 @@ if (!demoCoach.includes("Escape") || !/event\.target === sheet/.test(demoCoach))
 
 for (const rel of ["AUTHENTICITY.md", "SMOKE.md"]) {
   const text = read(rel);
-  if (!/theater/i.test(text) || !/keep-installed|popup/i.test(text)) {
-    errors.push(rel + " must explain theater vs keep-installed");
+  if (!/theater/i.test(text) || !/keep-installed/i.test(text) || !/side panel/i.test(text)) {
+    errors.push(rel + " must explain theater vs keep-installed side panel");
   }
 }
 if (!/FAKE — not Google\/Microsoft/.test(read("SMOKE.md"))) {
   errors.push("SMOKE.md must confirm the FAKE banner");
 }
 if (!/Do \*\*not\*\* open Beat A/.test(read("SMOKE.md")) && !/Do \*\*not\*\* open Beat/.test(read("SMOKE.md"))) {
-  errors.push("SMOKE.md must start from the popup with demo tabs closed");
+  errors.push("SMOKE.md must start from the side panel with demo tabs closed");
+}
+if (!/Open coach beside this tab/.test(read("SMOKE.md"))) {
+  errors.push("SMOKE.md must open the side panel from the popup launcher");
+}
+if (!/side panel/i.test(read("AUTHENTICITY.md")) || !/product surface/i.test(read("AUTHENTICITY.md"))) {
+  errors.push("AUTHENTICITY.md must name the side panel as the product surface");
 }
 
 const forbiddenVoice = /TLN|Tech Literacy Network|Devpost|hackathon|contest|competition/i;
 const liveIdpHref = /https?:\/\/(accounts\.google\.com|login\.microsoftonline\.com|login\.live\.com)/i;
-const revokeAllow = new Set(["popup/popup.js", "README.md"]);
+const revokeAllow = new Set(["sidepanel/sidepanel.js", "README.md"]);
 
 for (const rel of walkFiles(root)) {
   if (rel === "scripts/verify-spine.mjs") {

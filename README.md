@@ -14,16 +14,18 @@ Semblance treats that click as the event worth interrupting.
 
 ## Install (load unpacked)
 
+Chrome 116 or newer (side panel).
+
 1. Download or clone this repo.
 2. Open `chrome://extensions`.
 3. Turn on **Developer mode**.
 4. **Load unpacked** and pick this folder (the one with `manifest.json`).
 5. Pin **Semblance** to the toolbar.
-6. Click the icon. The popup is the product: scopes, friend-verify, paste ritual, revoke. You do not need the demo pages.
+6. Click the icon. **Open coach beside this tab.** The side panel is the product: scopes, friend-verify, paste ritual, revoke. You do not need the demo pages.
 
 No build step. Plain JavaScript. Manifest V3.
 
-Theater is optional and labeled. **Open Beat A · friend lure** opens `chrome-extension://…/demo/lure.html`. You do not need “Allow access to file URLs.” File copies of the demo pages are a fallback only.
+Theater is optional and labeled. **Open Beat A · friend lure** (still in the toolbar popup) opens `chrome-extension://…/demo/lure.html`. You do not need “Allow access to file URLs.” File copies of the demo pages are a fallback only.
 
 - What is theater vs what stays installed: [AUTHENTICITY.md](AUTHENTICITY.md)
 - Human Load-unpacked pass: [SMOKE.md](SMOKE.md)
@@ -48,11 +50,11 @@ A red banner is part of the page, sticky, not a toast:
 
 **FAKE — not Google/Microsoft**
 
-LabQueue asks for mail, Drive, contacts, and a long-lived grant — each one in plain language. Semblance pauses once, then hard-stops a raw Allow. It does not nag. A shared word (saved in the popup) or **I understand** opens the gate. Allow still goes nowhere: no token, no identity provider, no network.
+LabQueue asks for mail, Drive, contacts, and a long-lived grant — each one in plain language. Semblance pauses once, then hard-stops a raw Allow. It does not nag. A shared word (saved in the side panel) or **I understand** opens the gate. Allow still goes nowhere: no token, no identity provider, no network.
 
-### Beat C — toolbar coach
+### Beat C — side panel coach
 
-Open the Semblance popup again.
+Open the side panel from the toolbar popup if it is not already beside the tab.
 
 That coach is the product you keep. It does not need the demo pages:
 
@@ -65,7 +67,7 @@ That coach is the product you keep. It does not need the demo pages:
 
 After the three beats, leave Semblance installed.
 
-Use the popup on a real day: look up a scope, paste a suspicious localhost URL, verify a friend word, revoke an app you already allowed. The theater is optional. The translation layer is not. See [AUTHENTICITY.md](AUTHENTICITY.md) for the split, and [SMOKE.md](SMOKE.md) to walk it.
+Use the side panel on a real day: look up a scope, paste a suspicious localhost URL, verify a friend word, revoke an app you already allowed. Leave it open beside chat. The theater is optional. The translation layer is not. See [AUTHENTICITY.md](AUTHENTICITY.md) for the split, and [SMOKE.md](SMOKE.md) to walk it.
 
 Interrupts are once-only per browser. The reason log in `storage.local` is metadata — time, level, reason. No page text. No tokens.
 
