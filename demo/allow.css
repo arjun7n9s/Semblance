@@ -25,12 +25,13 @@ body {
   z-index: 50;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 16px 20px;
+  gap: 6px;
+  padding: 18px 20px 16px;
   background: var(--heat);
   color: #fff7f5;
   pointer-events: none;
   user-select: none;
+  box-shadow: 0 8px 24px rgba(90, 12, 8, 0.28);
 }
 
 .fake-banner strong {
@@ -41,8 +42,9 @@ body {
 }
 
 .fake-banner span {
-  font-size: 14px;
-  max-width: 52rem;
+  font-size: 15px;
+  max-width: 46rem;
+  font-weight: 500;
 }
 
 .frame {
@@ -72,19 +74,35 @@ body {
   margin-bottom: 18px;
 }
 
-.gmark {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+.lqmark {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border-radius: 8px;
   display: grid;
   place-items: center;
   border: 1px solid var(--ink);
+  background: var(--paper);
+  font-size: 13px;
   font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .app {
   margin: 0;
   font-weight: 650;
+}
+
+.prop-pill {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border: 1px solid var(--ink);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 650;
+  vertical-align: middle;
 }
 
 .who,
@@ -108,9 +126,9 @@ body {
 
 .scopes code {
   display: block;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 12px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--heat);
   margin-bottom: 4px;
 }
@@ -166,4 +184,10 @@ button.ghost {
 
 .after-actions a {
   color: var(--ink);
+}
+
+@media (max-width: 640px) {
+  .fake-banner strong {
+    font-size: 28px;
+  }
 }

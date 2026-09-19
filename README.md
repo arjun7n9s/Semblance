@@ -15,40 +15,45 @@ Semblance treats that click as the event worth interrupting.
 ## Install (load unpacked)
 
 1. Download or clone this repo.
-2. Chrome → `chrome://extensions`.
+2. Open `chrome://extensions`.
 3. Turn on **Developer mode**.
 4. **Load unpacked** and pick this folder (the one with `manifest.json`).
-5. Pin Semblance to the toolbar.
+5. Pin **Semblance** to the toolbar.
+6. Click the icon. Press **Open Beat A · friend lure**.
 
 No build step. Plain JavaScript. Manifest V3.
 
-Demo pages also live in the folder if you want to open them as files. The supported path is the toolbar popup: **Open Beat A** / **Open Beat B**. Those open `chrome-extension://` pages, so you do not need “Allow access to file URLs.”
+That button opens `chrome-extension://…/demo/lure.html`. You do not need “Allow access to file URLs.” File copies of the demo pages are a fallback only.
+
+Optional check after clone: `node scripts/verify-spine.mjs`.
 
 ## Three-beat walkthrough
 
 ### Beat A — friend lure
 
-Open `demo/lure.html` from the popup (or from the repo).
+From the pinned popup, **Open Beat A · friend lure**.
 
-A static Discord-style mock. Maya asks for thirty seconds on a campus-club “test.” The poison is the last line: mail and Drive are “normal.” Nothing here is a bot, a server, or a live chat.
+A static Discord-style mock. Maya asks for thirty seconds on a campus-club “test.” The poison is the last line: mail and Drive are “normal.” LabQueue is labeled as a prop. Nothing here is a bot, a server, or a live chat.
+
+Follow her **Open LabQueue** card.
 
 ### Beat B — FAKE Allow
 
-The lure link opens `demo/allow.html`.
+The lure link opens `demo/allow.html` on the same `chrome-extension://` origin.
 
-A red banner is part of the page, not a toast:
+A red banner is part of the page, sticky, not a toast:
 
 **FAKE — not Google/Microsoft**
 
-LabQueue asks for mail, Drive, contacts, and a long-lived grant — each one in plain language. Semblance pauses once, then hard-stops a raw Allow. It does not nag. A shared word or **I understand** opens the gate. Allow still goes nowhere: no token, no identity provider, no network.
+LabQueue asks for mail, Drive, contacts, and a long-lived grant — each one in plain language. Semblance pauses once, then hard-stops a raw Allow. It does not nag. A shared word (saved in the popup) or **I understand** opens the gate. Allow still goes nowhere: no token, no identity provider, no network.
 
 ### Beat C — toolbar coach
 
-Open the Semblance popup.
+Open the Semblance popup again.
 
 That coach is the product you keep. It does not need the demo pages:
 
-- ~15 common Google and Microsoft scopes → one teen-readable sentence each
+- ~15 common Google and Microsoft scopes → one plain sentence each
 - Friend-verify via `chrome.storage.local` (a shared word, this browser only) or an explicit I-understand
 - One-tap deep links to real Google and Microsoft connected-apps / revoke pages
 - A paste box that only runs local regex rules for localhost-auth and “paste the code” rituals

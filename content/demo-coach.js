@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  if (window.__semblanceCoachStarted) {
+  if (window.__semblanceCoachStarted || document.documentElement.getAttribute("data-semblance-coach") === "on") {
     return;
   }
 
@@ -10,7 +10,14 @@
     return;
   }
 
+  var extensionPage = location.protocol === "chrome-extension:";
+  var storeReady = window.SemblanceStore && SemblanceStore.available();
+  if (!extensionPage && !storeReady) {
+    return;
+  }
+
   window.__semblanceCoachStarted = true;
+  document.documentElement.setAttribute("data-semblance-coach", "on");
 
   var beat = /allow\.html$/i.test(path) ? "allow" : "lure";
   var pageKey = "demo-" + beat;
@@ -56,8 +63,8 @@
       kind === "hard-stop" ? "That Allow is the login." : "Pause. Read this before Allow.";
     var body =
       kind === "hard-stop"
-        ? "MFA never ran. The click is the whole breach. A friend-word or an I-understand is required — this browser only, no ping."
-        : "Scary scopes are written in adult jargon so they look normal. Semblance translates them. Confirm with the shared word, or say you understand.";
+        ? "MFA never ran. The click is the whole grant. Type the shared word from the popup, or tap I understand — this browser only, no ping."
+        : "These permissions are written in jargon so they look normal. Semblance translates them. Confirm with the shared word, or say you understand.";
 
     card.appendChild(el("h2", null, title));
     card.appendChild(el("p", null, body));
@@ -81,6 +88,13 @@
       }, 350);
     }
 
+    input.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        verify.click();
+      }
+    });
+
     verify.addEventListener("click", function () {
       if (!window.SemblanceStore || !SemblanceStore.available()) {
         note.textContent = "Load Semblance unpacked to store a shared word in this browser.";
@@ -88,7 +102,7 @@
       }
       SemblanceStore.checkFriendWord(input.value).then(function (ok) {
         if (!ok) {
-          note.textContent = "No match. Set the word in the Semblance popup, together.";
+          note.textContent = "No match. Save the word in the Semblance popup, then type it here.";
           return;
         }
         finish("Friend word matches. The gate is open in this browser.");
@@ -130,6 +144,7 @@
         }
         event.preventDefault();
         event.stopPropagation();
+        event.stopImmediatePropagation();
         SemblanceLadder.decide(pageKey).then(function (decision) {
           if (decision.action === "pass") {
             document.dispatchEvent(new CustomEvent("semblance:unlocked-allow"));
@@ -140,11 +155,29 @@
             mountSheet(decision.action);
             return;
           }
-          mountSheet("hard-stop");
+          noteQuiet();
         });
       },
       true
     );
+  }
+
+  function noteQuiet() {
+    var chip = document.querySelector(".semblance-chip p");
+    if (chip) {
+      chip.textContent =
+        "Still closed. Friend-verify or I understand in the popup — then Allow.";
+    }
+    var existing = document.querySelector(".semblance-quiet");
+    if (existing) {
+      return;
+    }
+    var quiet = el(
+      "p",
+      { class: "semblance-quiet", role: "status" },
+      "Semblance already paused once. Open the gate, then Allow. It will not nag."
+    );
+    document.documentElement.appendChild(quiet);
   }
 
   if (window.SemblanceStore && SemblanceStore.available()) {
@@ -154,12 +187,12 @@
   if (beat === "lure") {
     mountChip(
       "Semblance · Beat A",
-      "Scripted friend chat. The next click is the lesson — not a real login."
+      "Scripted friend chat. LabQueue is a prop. The next click is the lesson — not a real login."
     );
   } else {
     mountChip(
       "Semblance · Beat B",
-      "FAKE allow screen. Open the toolbar popup after you deal with the gate."
+      "FAKE allow screen — not Google, not Microsoft. Open the toolbar popup after you deal with the gate."
     );
     bindAllow();
     if (window.SemblanceLadder) {

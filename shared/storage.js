@@ -4,6 +4,7 @@
   var KEYS = {
     friendWord: "friendWord",
     understoodAt: "understoodAt",
+    friendOkAt: "friendOkAt",
     reasonLog: "reasonLog",
     interruptKeys: "interruptKeys",
     demoBeat: "demoBeat"
@@ -112,19 +113,25 @@
   }
 
   function isGateOpen() {
-    return Promise.all([get([KEYS.understoodAt, KEYS.friendWord]), sessionGet(["friendOk"])]).then(
-      function (pair) {
-        var data = pair[0];
-        var sess = pair[1];
-        return Boolean(data[KEYS.understoodAt] || sess.friendOk);
-      }
-    );
+    return Promise.all([
+      get([KEYS.understoodAt, KEYS.friendOkAt]),
+      sessionGet(["friendOk"])
+    ]).then(function (pair) {
+      var data = pair[0];
+      var sess = pair[1];
+      return Boolean(data[KEYS.understoodAt] || data[KEYS.friendOkAt] || sess.friendOk);
+    });
   }
 
   function setFriendWord(word) {
     var clean = String(word || "").trim();
     if (!clean) {
-      return set({ friendWord: "" });
+      return Promise.all([
+        set({ friendWord: "", friendOkAt: 0 }),
+        sessionSet({ friendOk: false })
+      ]).then(function () {
+        return true;
+      });
     }
     return set({ friendWord: clean });
   }
@@ -136,7 +143,10 @@
       if (!saved || !attempt || saved !== attempt) {
         return false;
       }
-      return sessionSet({ friendOk: true }).then(function () {
+      return Promise.all([
+        set({ friendOkAt: Date.now() }),
+        sessionSet({ friendOk: true })
+      ]).then(function () {
         return true;
       });
     });
@@ -152,7 +162,7 @@
 
   function clearGate() {
     return Promise.all([
-      set({ understoodAt: 0 }),
+      set({ understoodAt: 0, friendOkAt: 0 }),
       sessionSet({ friendOk: false })
     ]);
   }

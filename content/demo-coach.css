@@ -109,3 +109,17 @@
   font-size: 12px;
   color: #5b5146;
 }
+
+.semblance-quiet {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 2147483000;
+  max-width: 280px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #d7c7a4;
+  background: #f4efe6;
+  color: #161310;
+  font: 13px/1.45 "Segoe UI", "Helvetica Neue", sans-serif;
+}

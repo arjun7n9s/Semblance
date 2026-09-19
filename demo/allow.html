@@ -10,17 +10,20 @@
   <body data-semblance-beat="allow">
     <aside class="fake-banner" role="alert">
       <strong>FAKE — not Google/Microsoft</strong>
-      <span>This is Semblance theater. A real consent screen can steal the account without a second factor.</span>
+      <span>
+        LabQueue is a prop. This page never talks to an identity provider. A real Allow can grant the
+        account without MFA.
+      </span>
     </aside>
 
     <main class="frame">
-      <p class="prop-note">Prop consent card. No identity provider is involved.</p>
+      <p class="prop-note">Prop consent card · campus-club theater · no network</p>
       <section class="card">
         <header class="chooser">
-          <div class="gmark" aria-hidden="true">G</div>
+          <div class="lqmark" aria-hidden="true">LQ</div>
           <div>
-            <p class="app">LabQueue wants access to your account</p>
-            <p class="who">signed in as you@school.edu</p>
+            <p class="app">LabQueue <span class="prop-pill">prop</span> wants access to your account</p>
+            <p class="who">signed in as you@school.edu · not a real session</p>
           </div>
         </header>
 
@@ -35,7 +38,7 @@
           </li>
           <li data-scope="contacts">
             <code>contacts</code>
-            <p>Can read and change your contacts — your friends become their list.</p>
+            <p>Can read and change the people in your address book.</p>
           </li>
           <li data-scope="offline_access">
             <code>offline_access</code>
@@ -44,7 +47,8 @@
         </ul>
 
         <p class="fine">
-          The friend chat said this was normal. It is not. MFA never runs on this click.
+          Mail, Drive, contacts, and a long-lived grant are not a thirty-second test. MFA never runs
+          on this click.
         </p>
 
         <div class="actions">

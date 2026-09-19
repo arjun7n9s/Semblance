@@ -19,6 +19,15 @@
   }
 
   function openTab(url) {
+    if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
+      chrome.runtime.sendMessage({ type: "semblance:open", url: url }, function () {
+        var failed = typeof chrome.runtime.lastError !== "undefined" && chrome.runtime.lastError;
+        if (failed && chrome.tabs && chrome.tabs.create) {
+          chrome.tabs.create({ url: url });
+        }
+      });
+      return;
+    }
     if (typeof chrome !== "undefined" && chrome.tabs && chrome.tabs.create) {
       chrome.tabs.create({ url: url });
       return;
@@ -36,12 +45,17 @@
     }
     rows.forEach(function (scope) {
       var li = document.createElement("li");
-      var raw = document.createElement("span");
+      var meta = document.createElement("span");
+      var raw = document.createElement("code");
       var sentence = document.createElement("span");
-      li.className = "heat-" + scope.heat;
+      li.className = "scope heat-" + scope.heat;
+      meta.className = "meta";
+      meta.textContent = scope.family + " · " + scope.heat;
       raw.className = "raw";
-      raw.textContent = scope.family + " · " + scope.raw;
+      raw.textContent = scope.raw;
+      sentence.className = "sentence";
       sentence.textContent = scope.sentence;
+      li.appendChild(meta);
       li.appendChild(raw);
       li.appendChild(sentence);
       list.appendChild(li);
@@ -50,18 +64,26 @@
 
   function renderRitual(hits) {
     var list = $("ritual-hits");
+    var status = $("ritual-status");
     list.innerHTML = "";
     if (!hits.length) {
+      status.textContent = "No paste / localhost-auth ritual in that text. Nothing was stored.";
       list.innerHTML =
-        '<li class="empty">No paste / localhost-auth ritual in that text. Still: do not paste codes for a stranger.</li>';
+        '<li class="empty">Still: do not paste codes for a stranger. The box above is unchanged.</li>';
       return;
     }
+    status.textContent =
+      hits.length === 1
+        ? "1 ritual in that paste. Nothing was stored."
+        : hits.length + " rituals in that paste. Nothing was stored.";
     hits.forEach(function (hit) {
       var li = document.createElement("li");
       var raw = document.createElement("span");
       var sentence = document.createElement("span");
+      li.className = "hit";
       raw.className = "raw heat-high";
       raw.textContent = hit.title;
+      sentence.className = "sentence";
       sentence.textContent = hit.sentence;
       li.appendChild(raw);
       li.appendChild(sentence);
@@ -94,28 +116,33 @@
       $("gate-status").textContent = "Storage is unavailable in this window.";
       return;
     }
-    SemblanceStore.get(["friendWord", "understoodAt", "reasonLog", "demoBeat"]).then(function (data) {
-      if (data.friendWord) {
-        $("friend-word").value = data.friendWord;
-      }
-      SemblanceStore.isGateOpen().then(function (open) {
-        if (open && data.understoodAt) {
-          $("gate-status").textContent = "Gate open: I understand is on file in this browser.";
-        } else if (open) {
-          $("gate-status").textContent = "Gate open: friend word checked this session.";
-        } else if (data.friendWord) {
-          $("gate-status").textContent = "Shared word saved. It never leaves this browser.";
+    SemblanceStore.get(["friendWord", "understoodAt", "friendOkAt", "reasonLog", "demoBeat"]).then(
+      function (data) {
+        if (data.friendWord) {
+          $("friend-word").value = data.friendWord;
         } else {
-          $("gate-status").textContent = "No gate yet. Save a word or tap I understand.";
+          $("friend-word").value = "";
         }
-      });
-      if (data.demoBeat === "allow" || data.demoBeat === "coach") {
-        $("beat-c").hidden = false;
-        $("lede").textContent =
-          "Beat C. You already saw the fake Allow. The coach below is the part worth keeping installed.";
+        SemblanceStore.isGateOpen().then(function (open) {
+          if (open && data.understoodAt) {
+            $("gate-status").textContent = "Gate open: I understand is on file in this browser.";
+          } else if (open) {
+            $("gate-status").textContent = "Gate open: friend word verified in this browser.";
+          } else if (data.friendWord) {
+            $("gate-status").textContent =
+              "Shared word saved locally. Type it on the fake Allow to open the gate.";
+          } else {
+            $("gate-status").textContent = "No gate yet. Save a word or tap I understand.";
+          }
+        });
+        if (data.demoBeat === "allow" || data.demoBeat === "coach") {
+          $("beat-c").hidden = false;
+          $("lede").textContent =
+            "Beat C. You already saw the fake Allow. The coach below is the part worth keeping installed.";
+        }
+        renderLog(data.reasonLog || []);
       }
-      renderLog(data.reasonLog || []);
-    });
+    );
   }
 
   $("scope-query").addEventListener("input", function (event) {
@@ -124,10 +151,15 @@
 
   $("save-word").addEventListener("click", function () {
     SemblanceStore.setFriendWord($("friend-word").value).then(function () {
-      $("gate-status").textContent = $("friend-word").value.trim()
-        ? "Shared word saved locally."
-        : "Shared word cleared.";
+      refreshGate();
     });
+  });
+
+  $("friend-word").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      $("save-word").click();
+    }
   });
 
   $("understand").addEventListener("click", function () {
@@ -139,8 +171,12 @@
 
   $("ritual-check").addEventListener("click", function () {
     var text = $("ritual-input").value;
+    if (!String(text || "").trim()) {
+      $("ritual-status").textContent = "Paste a URL or a line first. Nothing was stored.";
+      $("ritual-hits").innerHTML = "";
+      return;
+    }
     renderRitual(SemblanceRituals.inspect(text));
-    $("ritual-input").value = "";
   });
 
   $("revoke-google").addEventListener("click", function () {

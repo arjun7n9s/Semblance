@@ -6,12 +6,68 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (rel) => fs.readFileSync(path.join(root, rel), "utf8");
 
-function loadScript(rel) {
-  const context = { globalThis: {} };
+function walkFiles(dir, acc = []) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name === ".git" || entry.name === "node_modules") {
+      continue;
+    }
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      walkFiles(full, acc);
+    } else if (/\.(html|js|mjs|css|md|json)$/i.test(entry.name)) {
+      acc.push(path.relative(root, full).split(path.sep).join("/"));
+    }
+  }
+  return acc;
+}
+
+function loadScripts(rels, extra = {}) {
+  const context = { ...extra };
   context.globalThis = context;
+  context.window = context;
   vm.createContext(context);
-  vm.runInContext(read(rel), context, { filename: rel });
+  for (const rel of rels) {
+    vm.runInContext(read(rel), context, { filename: rel });
+  }
   return context;
+}
+
+function loadScript(rel, extra = {}) {
+  return loadScripts([rel], extra);
+}
+
+function memoryChrome(withSession = true) {
+  function area(bucket) {
+    return {
+      get(keys, cb) {
+        const out = {};
+        const list = Array.isArray(keys) ? keys : [keys];
+        for (const key of list) {
+          if (key && Object.prototype.hasOwnProperty.call(bucket, key)) {
+            out[key] = bucket[key];
+          }
+        }
+        cb(out);
+      },
+      set(partial, cb) {
+        Object.assign(bucket, partial);
+        if (cb) {
+          cb();
+        }
+      }
+    };
+  }
+  const localBucket = {};
+  const sessionBucket = {};
+  const chrome = {
+    storage: {
+      local: area(localBucket)
+    }
+  };
+  if (withSession) {
+    chrome.storage.session = area(sessionBucket);
+  }
+  return { chrome, localBucket, sessionBucket };
 }
 
 const manifest = JSON.parse(read("manifest.json"));
@@ -23,8 +79,14 @@ if (manifest.manifest_version !== 3) {
 if (!manifest.action?.default_popup) {
   errors.push("popup missing");
 }
-if (!manifest.permissions?.includes("storage")) {
-  errors.push("storage permission missing");
+if (!Array.isArray(manifest.permissions) || manifest.permissions.join() !== "storage") {
+  errors.push("permissions must be storage only");
+}
+if (manifest.host_permissions?.length) {
+  errors.push("no host_permissions on the spine");
+}
+if (manifest.web_accessible_resources) {
+  errors.push("web_accessible_resources not needed for popup chrome-extension:// demo tabs");
 }
 
 const forbiddenHosts = /accounts\.google\.com|login\.microsoftonline\.com|login\.live\.com/;
@@ -34,9 +96,17 @@ if (forbiddenHosts.test(matches)) {
 }
 for (const script of manifest.content_scripts || []) {
   const globs = script.include_globs || [];
-  const onlyDemo = globs.every((glob) => /demo\/(allow|lure)\.html/.test(glob));
+  const onlyDemo = globs.length > 0 && globs.every((glob) => /demo\/(allow|lure)\.html/.test(glob));
   if (!onlyDemo) {
     errors.push("content_scripts include_globs must stay on demo pages");
+  }
+  const onlyFile = (script.matches || []).every((rule) => rule.startsWith("file:"));
+  if (!onlyFile) {
+    errors.push("content_scripts matches must stay on file:// demo fallback");
+  }
+  const css = script.css || [];
+  if (!css.some((item) => item.includes("demo-coach.css"))) {
+    errors.push("content_scripts must inject demo-coach.css for file:// fallback");
   }
 }
 
@@ -67,23 +137,115 @@ for (const [sample, id] of ritualCases) {
 }
 
 const banner = read("demo/allow.html");
-if (!/FAKE — not Google\/Microsoft/.test(banner) && !/FAKE — not Google\/Microsoft/.test(banner.replace("—", "—"))) {
-  if (!banner.includes("FAKE") || !banner.includes("not Google/Microsoft")) {
-    errors.push("fake allow banner copy missing");
+if (!banner.includes("FAKE — not Google/Microsoft") && !banner.includes("FAKE - not Google/Microsoft")) {
+  errors.push("fake allow banner copy missing");
+}
+if (!/class="fake-banner"/.test(banner)) {
+  errors.push("fake-banner element missing");
+}
+if (!/LabQueue/.test(banner) || !/prop/i.test(banner)) {
+  errors.push("LabQueue must be labeled as theater/prop on Beat B");
+}
+
+const allowCss = read("demo/allow.css");
+if (!/\.fake-banner\s*\{[^}]*position:\s*sticky/s.test(allowCss) || !/\.fake-banner\s*\{[^}]*top:\s*0/s.test(allowCss)) {
+  errors.push("FAKE banner must be position:sticky; top:0");
+}
+
+const lure = read("demo/lure.html");
+if (!/LabQueue/.test(lure) || !/prop/i.test(lure)) {
+  errors.push("LabQueue must be labeled as a prop on Beat A");
+}
+
+for (const rel of ["demo/lure.html", "demo/allow.html"]) {
+  const html = read(rel);
+  if (!html.includes("content/demo-coach.css")) {
+    errors.push(rel + " must link demo-coach.css for chrome-extension://");
+  }
+  if (!html.includes("content/demo-coach.js")) {
+    errors.push(rel + " must include demo-coach.js for chrome-extension://");
   }
 }
 
+const popupJs = read("popup/popup.js");
+if (!/chrome\.runtime\.getURL/.test(popupJs) || !/demo\/lure\.html/.test(popupJs) || !/demo\/allow\.html/.test(popupJs)) {
+  errors.push("popup must open demo pages via chrome.runtime.getURL");
+}
+if (!/semblance:open/.test(popupJs)) {
+  errors.push("popup should open tabs through the service worker");
+}
+
+const demoCoach = read("content/demo-coach.js");
+if (!/function noteQuiet/.test(demoCoach) || /mountSheet\("hard-stop"\)/.test(demoCoach)) {
+  errors.push("quiet ladder must not remount a nag sheet");
+}
+
 const forbiddenVoice = /TLN|Tech Literacy Network|Devpost|hackathon|contest|competition/i;
-for (const rel of [
-  "README.md",
-  "manifest.json",
-  "popup/popup.html",
-  "demo/lure.html",
-  "demo/allow.html"
-]) {
-  if (forbiddenVoice.test(read(rel))) {
+const liveIdpHref = /https?:\/\/(accounts\.google\.com|login\.microsoftonline\.com|login\.live\.com)/i;
+const revokeAllow = new Set(["popup/popup.js", "README.md"]);
+
+for (const rel of walkFiles(root)) {
+  if (rel === "scripts/verify-spine.mjs") {
+    continue;
+  }
+  const text = read(rel);
+  if (forbiddenVoice.test(text)) {
     errors.push("forbidden framing in " + rel);
   }
+  if (liveIdpHref.test(text) && !revokeAllow.has(rel)) {
+    errors.push("live IdP URL in " + rel);
+  }
+}
+
+const withSession = memoryChrome(true);
+const storeCtx = loadScripts(["shared/storage.js", "shared/ladder.js"], {
+  chrome: withSession.chrome
+});
+const ladder = storeCtx.SemblanceLadder;
+const store = storeCtx.SemblanceStore;
+
+async function checkLadder() {
+  const first = await ladder.decide("demo-allow");
+  if (first.action !== "pause") {
+    errors.push("ladder first interrupt should pause, got " + first.action);
+  }
+  await ladder.commit("demo-allow", "pause");
+  const second = await ladder.decide("demo-allow");
+  if (second.action !== "hard-stop") {
+    errors.push("ladder second interrupt should hard-stop, got " + second.action);
+  }
+  await ladder.commit("demo-allow", "hard-stop");
+  const third = await ladder.decide("demo-allow");
+  if (third.action !== "quiet") {
+    errors.push("ladder third interrupt should quiet, got " + third.action);
+  }
+  if (third.action === "pass") {
+    errors.push("quiet must not pass a closed gate");
+  }
+  await store.setUnderstood();
+  const opened = await ladder.decide("demo-allow");
+  if (opened.action !== "pass") {
+    errors.push("open gate should pass, got " + opened.action);
+  }
+}
+
+async function checkFriendVerifyWithoutSession() {
+  const noSession = memoryChrome(false);
+  const ctx = loadScript("shared/storage.js", { chrome: noSession.chrome });
+  await ctx.SemblanceStore.setFriendWord("maple");
+  const miss = await ctx.SemblanceStore.checkFriendWord("wrong");
+  const hit = await ctx.SemblanceStore.checkFriendWord("Maple");
+  const open = await ctx.SemblanceStore.isGateOpen();
+  if (miss || !hit || !open) {
+    errors.push("friend-verify must persist via chrome.storage.local when session is missing");
+  }
+}
+
+try {
+  await checkLadder();
+  await checkFriendVerifyWithoutSession();
+} catch (err) {
+  errors.push("spine runtime check failed: " + err.message);
 }
 
 if (errors.length) {

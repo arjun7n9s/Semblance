@@ -10,7 +10,7 @@
     if (fromDeny) {
       aftermath.querySelector("h1").textContent = "Deny is the right muscle.";
       aftermath.querySelector("p").textContent =
-        "You left without granting mail, Drive, contacts, or a long leash. Open the Semblance popup anyway — Beat C is the coach you keep.";
+        "You left without granting mail, Drive, contacts, or a long-lived grant. Open the Semblance popup anyway — Beat C is the coach you keep.";
     }
     if (window.SemblanceStore && SemblanceStore.available()) {
       SemblanceStore.setDemoBeat("coach");
@@ -26,10 +26,10 @@
     showAftermath(true);
   });
 
-  if (!window.SemblanceLadder) {
-    allowBtn.addEventListener("click", function (event) {
-      event.preventDefault();
-      showAftermath(false);
-    });
-  }
+  allowBtn.addEventListener("click", function (event) {
+    if (event.defaultPrevented) {
+      return;
+    }
+    showAftermath(false);
+  });
 })();

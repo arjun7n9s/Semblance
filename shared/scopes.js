@@ -70,7 +70,7 @@
       raw: "contacts",
       family: "Google",
       heat: "high",
-      sentence: "Can read and change your contacts — your friends become their list."
+      sentence: "Can read and change the people in your address book."
     },
     {
       id: "cloud-platform",

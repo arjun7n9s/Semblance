@@ -29,7 +29,9 @@ chrome.runtime.onMessage.addListener(function (message, _sender, sendResponse) {
   }
 
   if (message.type === "semblance:open") {
-    chrome.tabs.create({ url: message.url });
+    if (typeof message.url === "string" && message.url) {
+      chrome.tabs.create({ url: message.url });
+    }
     sendResponse({ ok: true });
     return false;
   }
