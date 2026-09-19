@@ -21,5 +21,6 @@ Open the toolbar popup on an empty day:
 ## Honesty rules
 
 - The Allow click is the breach. MFA never runs on it. Theater pauses a fake Allow. Real Allow screens stay untouched.
+- If the gate is already open from the popup, Beat B Allow does not pause again. You already owned the click. To show the once-only ladder, leave the gate closed.
 - LabQueue is a prop. If the FAKE banner is not visible, stop — do not present.
 - Reason log is metadata (time, level, reason). No page text. No tokens.

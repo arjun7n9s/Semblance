@@ -287,6 +287,9 @@ if (!demoCoach.includes("__semblanceCoachStarted") || !demoCoach.includes("data-
 if (!demoCoach.includes("FAKE — not Google/Microsoft") || !demoCoach.includes("semblance-fake")) {
   errors.push("Beat B pause sheet must repeat the FAKE banner");
 }
+if (!demoCoach.includes("Escape") || !/event\.target === sheet/.test(demoCoach)) {
+  errors.push("pause sheet must dismiss without opening the gate");
+}
 
 for (const rel of ["AUTHENTICITY.md", "SMOKE.md"]) {
   const text = read(rel);

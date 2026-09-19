@@ -16,6 +16,6 @@ Human checklist after `chrome://extensions` → Developer mode → **Load unpack
 
 8. From the same popup, **Open Beat A · friend lure**. Chat cannot send. LabQueue is labeled a prop.
 9. Open LabQueue / **Open Beat B · fake Allow**. Sticky banner **FAKE — not Google/Microsoft** stays on top, including over the pause sheet.
-10. Allow once → pause. Allow again → hard-stop. Allow again → quiet, no nag sheet. Gate still closed until verify or I understand.
-11. Friend-verify or I understand, then Allow → aftermath. Still no network.
+10. If the gate is already open from step 5, Allow goes to aftermath — you already owned the click. Still no network. LabQueue is still a prop.
+11. To see pause → hard-stop → quiet: clear the shared word (empty Save word) so the gate closes, reload Beat B. The pause sheet may already be up. Esc or click the dim area — do not tap I understand. Allow → hard-stop. Esc. Allow again → quiet, no nag sheet. Gate still closed.
 12. Close every demo tab. Open the popup again. Scope, paste, friend-verify, and revoke still work. Theater was optional.

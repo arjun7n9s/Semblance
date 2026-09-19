@@ -48,6 +48,10 @@
   }
 
   function closeSheet(sheet) {
+    if (sheet && sheet.__semblanceOnKey) {
+      document.removeEventListener("keydown", sheet.__semblanceOnKey, true);
+      sheet.__semblanceOnKey = null;
+    }
     if (sheet && sheet.parentNode) {
       sheet.parentNode.removeChild(sheet);
     }
@@ -129,8 +133,23 @@
     card.appendChild(label);
     card.appendChild(input);
     card.appendChild(actions);
+    card.appendChild(
+      el("p", { class: "semblance-note" }, "Esc or click outside keeps the gate closed.")
+    );
     card.appendChild(note);
     sheet.appendChild(card);
+    sheet.addEventListener("click", function (event) {
+      if (event.target === sheet) {
+        closeSheet(sheet);
+      }
+    });
+    sheet.__semblanceOnKey = function (event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeSheet(sheet);
+      }
+    };
+    document.addEventListener("keydown", sheet.__semblanceOnKey, true);
     document.documentElement.appendChild(sheet);
     input.focus();
     return sheet;
