@@ -11,34 +11,46 @@
       <p class="eyebrow">Semblance</p>
       <h1>Allow is the login.</h1>
       <p class="lede">
-        The coach stays open beside the tab. You do not need the demo pages.
+        MFA never runs on Allow, on Continue with Google, or on a device-login code.
+        Open the coach beside that click.
       </p>
     </header>
+
+    <section class="panel live" id="live-hit" hidden>
+      <h2 id="live-kicker">This tab is asking for Allow</h2>
+      <p id="live-lead"></p>
+      <ol id="live-list"></ol>
+      <p class="status" id="live-status" role="status" aria-live="polite"></p>
+    </section>
 
     <section class="panel">
       <h2>Keep installed</h2>
       <p>
-        Leave it open next to chat. Paste a scope= URL, verify a friend, check a paste,
-        revoke. Optional revoke check-in lives in the panel — default off.
+        The coach reads an authorize URL from the address bar, or you paste one.
+        Same map for a job-form Continue, a pasted <code>code=</code>, or a device
+        login. Optional revoke check-in lives in the panel — default off.
       </p>
       <button id="open-panel" type="button">Open coach beside this tab</button>
       <p class="status" id="panel-status" role="status" aria-live="polite"></p>
       <p class="status" id="remind-cue" hidden></p>
     </section>
 
-    <section class="panel quiet">
-      <h2>Optional theater</h2>
+    <details class="panel quiet demo-only">
+      <summary>Demo only (labeled FAKE)</summary>
       <p>
-        Labeled FAKE walkthrough. LabQueue is a prop. The side panel does not need these pages.
+        Labeled FAKE walkthrough of one story in the family. LabQueue is a prop.
+        You do not need these pages to use the coach.
       </p>
       <div class="stack">
         <button id="open-lure" type="button">Open Beat A · friend lure</button>
         <button id="open-allow" class="ghost" type="button">Open Beat B · fake Allow</button>
       </div>
-    </section>
+    </details>
 
+    <script src="../shared/scopes.js"></script>
     <script src="../shared/storage.js"></script>
     <script src="../shared/remind.js"></script>
+    <script src="../shared/watch.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

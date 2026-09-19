@@ -8,7 +8,8 @@
     reasonLog: "reasonLog",
     interruptKeys: "interruptKeys",
     demoBeat: "demoBeat",
-    revokeRemind: "revokeRemind"
+    revokeRemind: "revokeRemind",
+    liveAllows: "liveAllows"
   };
 
   var LOG_CAP = 40;
@@ -173,8 +174,13 @@
     available: function () {
       return Boolean(local());
     },
+    sessionAvailable: function () {
+      return Boolean(session());
+    },
     get: get,
     set: set,
+    sessionGet: sessionGet,
+    sessionSet: sessionSet,
     logReason: logReason,
     hasInterrupt: hasInterrupt,
     markInterrupt: markInterrupt,

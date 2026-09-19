@@ -4,9 +4,9 @@
   <img src="docs/readme/semblance-brand-banner.png" alt="Semblance — Pause at Allow." width="720">
 </p>
 
-A friend-shaped message is the trust fall. Then an OAuth **Allow** — and MFA never runs on that click. The Allow *is* the breach.
+OAuth **Allow** is the login. MFA never runs on that click, on **Continue with Google / Microsoft**, or on a device-login code. The breach is the consent handoff — a trust invite, a job or club form, a pasted `code=`, a device door, or high-risk scopes on an app you have not read. One coach for that family. Not five products.
 
-Semblance sits beside the tab, turns those scopes into ordinary sentences, and keeps a revoke door one tap away after you already granted something.
+Semblance sits beside the tab. When the address bar is an authorize URL, it reads `scope=` and the coach already has the plain-language map. A device-login URL gets the same pause. Paste stays as fallback. Revoke stays one tap away after you already granted something.
 
 ## Install
 
@@ -25,9 +25,9 @@ That panel is the product. You do not need the demo pages.
 
 ## Keep installed
 
-Leave the coach open next to chat. Paste an Allow URL or a `scope=` query. Read the scopes in plain language. Verify a person in the room — a shared word in this browser, or **I understand**. Revoke through official Google and Microsoft pages. An optional check-in can nudge you later; it is off until you schedule it.
+Leave the coach open. Land on an Allow URL — badge `!`, open Semblance, scopes already decoded. You do not have to paste. A `…/devicelogin` or `google.com/device` tab is the same nudge: typing a code is Allow. Paste a `scope=` URL or a `code=` / localhost line when the tab is not already that door. Verify a person in the room, or **I understand**. Revoke through official Google and Microsoft pages. An optional check-in can nudge you later; it is off until you schedule it.
 
-Nothing in this panel talks to a live login host. Real Allow screens stay untouched.
+Semblance reads the address bar (`webNavigation` / tab URL). It does not inject into a live login host. It does not click Allow. It does not score the link.
 
 <table>
   <tr>
@@ -46,7 +46,7 @@ Nothing in this panel talks to a live login host. Real Allow screens stay untouc
     <td align="center" valign="top" width="50%">
       <img src="docs/readme/unknown-scope-decode.png" alt="Semblance decode with a known Drive scope and an unknown token left unknown." width="440">
       <br>
-      <em>Paste a <code>scope=</code> URL. Unknown stays unknown.</em>
+      <em>Known tokens get a sentence. Unknown stays unknown. Not a link score.</em>
     </td>
     <td align="center" valign="top" width="50%">
       <img src="docs/readme/checkin-default-off.png" alt="Semblance revoke links and check-in, default off." width="440">
@@ -65,27 +65,27 @@ Nothing in this panel talks to a live login host. Real Allow screens stay untouc
 
 ## Optional theater
 
-Labeled **FAKE** only. LabQueue is a prop. The walkthrough is a story about the same click, not a live identity provider.
+Labeled **FAKE** only, behind **Demo only (labeled FAKE)** in the toolbar popup. LabQueue is a prop. The walkthrough is one story about the same click, not a live identity provider, and not the product door.
 
 <p align="center">
   <img src="docs/readme/semblance-flow.png" alt="Diagram: friend lure, Allow click, revoke door." width="640">
   <br>
-  <em>Friend lure → Allow click → revoke door. Not a live Allow screen.</em>
+  <em>One story in the family. Not a live Allow screen.</em>
 </p>
 
-From the toolbar popup, **Open Beat A · friend lure**. Maya’s chat cannot send. Follow **Open LabQueue** into Beat B.
-
-Beat B carries a sticky banner: **FAKE — not Google/Microsoft**. Semblance pauses once, then hard-stops a raw Allow. A shared word (saved in the side panel) or **I understand** opens the gate. Allow still goes nowhere: no token, no network, no identity provider.
+Beat B carries a sticky banner: **FAKE — not Google/Microsoft**. Allow still goes nowhere: no token, no network, no identity provider.
 
 Close every demo tab. The side panel is still the product.
 
 ## What we refuse
 
 - No content scripts on `accounts.google.com`, Microsoft login, or any live identity provider
-- No reading or exchanging codes, cookies, or tokens
+- No reading or exchanging codes, cookies, or tokens — address bar `scope=` only; `code=` stays a paste you chose
+- No blocking or rewriting Allow, no declarativeNetRequest Allow-gate
 - No Discord bot, no parent ping, no cloud on the critical path
 - No URL “phishing score”
 - No account scanning — the optional check-in is a local timer you schedule, not monitoring
+- No five separate products and no SOC-museum dump of every enterprise scope
 - Real Allow screens stay untouched. Use the coach and the official revoke links instead.
 
 The content script, if it runs at all, may attach to the Semblance demo pages only (`demo/lure.html`, `demo/allow.html`).

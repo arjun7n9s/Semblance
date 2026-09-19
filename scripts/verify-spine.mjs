@@ -22,7 +22,7 @@ function walkFiles(dir, acc = []) {
 }
 
 function loadScripts(rels, extra = {}) {
-  const context = { ...extra };
+  const context = { URL, URLSearchParams, ...extra };
   context.globalThis = context;
   context.window = context;
   vm.createContext(context);
@@ -172,12 +172,15 @@ if (manifest.side_panel?.default_path !== "sidepanel/sidepanel.html") {
   errors.push("side_panel.default_path must be sidepanel/sidepanel.html");
 }
 const perms = Array.isArray(manifest.permissions) ? manifest.permissions.slice().sort() : [];
-if (perms.join() !== "alarms,notifications,sidePanel,storage") {
-  errors.push("permissions must be alarms, notifications, sidePanel, and storage");
+if (perms.join() !== "alarms,notifications,sidePanel,storage,tabs,webNavigation") {
+  errors.push("permissions must be alarms, notifications, sidePanel, storage, tabs, and webNavigation");
 }
-const scaryPerms = /webNavigation|webRequest|declarativeNetRequest|identity|cookies|history|debugger|proxy|tabCapture|geolocation|scripting/;
+const scaryPerms = /webRequest|declarativeNetRequest|identity|cookies|history|debugger|proxy|tabCapture|geolocation|scripting/;
 if ((manifest.permissions || []).some((perm) => scaryPerms.test(perm))) {
   errors.push("no surveillance, IdP, or DNR permissions on the spine");
+}
+if (!(manifest.permissions || []).includes("webNavigation") || !(manifest.permissions || []).includes("tabs")) {
+  errors.push("live Allow detect needs tabs + webNavigation (URL only)");
 }
 if (manifest.host_permissions?.length) {
   errors.push("no host_permissions on the spine");
@@ -589,6 +592,15 @@ if (popupHtml.includes('id="scope-decode"') || popupHtml.includes('id="scope-dec
 if (!popupHtml.includes('id="open-lure"') || !popupHtml.includes('id="open-allow"')) {
   errors.push("popup must still launch Beat A and Beat B");
 }
+if (!/Demo only \(labeled FAKE\)/.test(popupHtml) || !/<details[\s\S]*id="open-lure"/.test(popupHtml)) {
+  errors.push("Beat A/B must sit behind Demo only (labeled FAKE)");
+}
+if (popupHtml.indexOf("Demo only (labeled FAKE)") > popupHtml.indexOf('id="open-lure"')) {
+  errors.push("theater must not lead the popup");
+}
+if (!popupHtml.includes('id="live-hit"') || !/SemblanceWatch\.readTab/.test(popupJs)) {
+  errors.push("popup must show the live tab decode when the badge fires");
+}
 
 if (panelHtml.includes("demo-coach") || panelHtml.includes("demo/") || panelHtml.includes("open-lure") || panelHtml.includes("open-allow")) {
   errors.push("side panel must not be a second theater stage");
@@ -614,6 +626,12 @@ if (/phish|reputation|safe to open|malicious link|url score/i.test(panelHtml + p
 if (!/SemblanceScopes\.decode/.test(panelJs) || !/scope-decode-input/.test(panelJs)) {
   errors.push("side panel must run SemblanceScopes.decode on the paste field");
 }
+if (!panelHtml.includes('id="live-hit"') || !panelHtml.includes('id="live-list"') || !/SemblanceWatch\.readTab/.test(panelJs)) {
+  errors.push("side panel must auto-show the active tab decode without paste");
+}
+if (!/device-login door/.test(panelJs) || !/device-login/.test(panelHtml + popupHtml)) {
+  errors.push("coach must treat device-login URLs as the same spine, not a second product");
+}
 const decodeChunk = (panelJs.split('$("scope-decode")')[1] || "").split('$("save-word")')[0];
 if (!decodeChunk || /SemblanceStore|chrome\.storage|setDemoBeat|fetch\(|XMLHttpRequest/.test(decodeChunk)) {
   errors.push("scope decode must stay local and unstored — no storage, no theater, no network");
@@ -634,15 +652,36 @@ if (!/SemblanceRemind\.REVOKE/.test(panelJs)) {
 }
 
 const remindJs = read("shared/remind.js");
+const watchJs = read("shared/watch.js");
 const sw = read("background/service-worker.js");
 if (!/shared\/remind\.js/.test(sw) || !/SemblanceRemind\.attachWorker/.test(sw)) {
   errors.push("service worker must import remind.js and attachWorker synchronously so alarms can wake it");
+}
+if (!/shared\/watch\.js/.test(sw) || !/SemblanceWatch\.attachWorker/.test(sw)) {
+  errors.push("service worker must import watch.js and attachWorker synchronously so navigation can wake it");
 }
 if (/alarms\.create/.test(sw) || /SemblanceRemind\.schedule/.test(sw)) {
   errors.push("service worker must not schedule alarms — opt-in lives in the side panel");
 }
 if (/setInterval/.test(sw) || /periodInMinutes/.test(sw + remindJs)) {
   errors.push("service worker / reminder must not keep-alive or repeat as monitoring");
+}
+if (/executeScript|declarativeNetRequest|webRequest|chrome\.cookies|host_permissions/.test(watchJs + sw)) {
+  errors.push("live watch must stay URL-only — no inject, cookies, or DNR");
+}
+if (/fetch\(|XMLHttpRequest|WebSocket/.test(watchJs)) {
+  errors.push("live watch must not network");
+}
+const onUrlChunk = (watchJs.split("function onUrl")[1] || "").split("function onNavDetails")[0];
+const rememberChunk = (watchJs.split("function rememberSnapshot")[1] || "").split("function remember(")[0];
+if (/sidePanel\.open/.test(onUrlChunk + rememberChunk)) {
+  errors.push("must not open the side panel from navigation — Chrome needs a user gesture");
+}
+if (!/webNavigation\.onCommitted/.test(watchJs) || !/tabs\.onUpdated/.test(watchJs)) {
+  errors.push("live detect must listen to webNavigation and tabs.onUpdated");
+}
+if (!/frameId !== 0/.test(watchJs) && !/frameId !== 0/.test(watchJs.replace(/\s/g, ""))) {
+  errors.push("webNavigation must ignore iframes (main frame only)");
 }
 if (/storage\.sync/.test(remindJs) || /storage\.session/.test(remindJs)) {
   errors.push("revoke reminder must persist in chrome.storage.local only");
@@ -727,6 +766,28 @@ if (!/not watching accounts/.test(read("SMOKE.md")) && !/not watching your accou
 }
 if (!/1 minute/.test(read("SMOKE.md")) || !/Turn off/.test(read("SMOKE.md")) || !/not live monitoring/.test(read("SMOKE.md"))) {
   errors.push("SMOKE.md must schedule, cancel, and fire a reminder without claiming monitoring");
+}
+if (!/example\.com\/authorize/.test(read("SMOKE.md")) || !/Do \*\*not\*\* paste/.test(read("SMOKE.md"))) {
+  errors.push("SMOKE.md must fire the live badge from a sample authorize URL without paste");
+}
+if (!/example\.com\/devicelogin/.test(read("SMOKE.md"))) {
+  errors.push("SMOKE.md must include a device-login URL nudge");
+}
+if (!/Demo only \(labeled FAKE\)/.test(read("SMOKE.md")) || !/Demo only \(labeled FAKE\)/.test(read("README.md"))) {
+  errors.push("SMOKE.md and README must bury theater behind Demo only (labeled FAKE)");
+}
+if (!/webNavigation/.test(read("AUTHENTICITY.md")) || !/storage\.session/.test(read("AUTHENTICITY.md"))) {
+  errors.push("AUTHENTICITY.md must document URL-only live detect into session storage");
+}
+if (!/device-login|devicelogin|device login/i.test(read("AUTHENTICITY.md")) || !/device-login|devicelogin|device login/i.test(read("README.md"))) {
+  errors.push("docs must name device-login as the same spine, not a second product");
+}
+const readmeLead = read("README.md").slice(0, 1200);
+if (/Maya|friend-shaped message is the trust fall/i.test(readmeLead)) {
+  errors.push("README must lead with the consent-breach family, not the friend-DM skit");
+}
+if (!/Continue with Google/i.test(readmeLead) || !/device-login code/i.test(readmeLead)) {
+  errors.push("README lead must name the consent family, not a single skit");
 }
 
 const forbiddenVoice = /TLN|Tech Literacy Network|Devpost|hackathon|contest|competition/i;
@@ -965,11 +1026,318 @@ async function checkRevokeRemind() {
   }
 }
 
+function watchChrome() {
+  const mem = remindChrome();
+  mem.badgeByTab = {};
+  mem.titleByTab = {};
+  mem.sidePanelOpens = 0;
+  mem.navListeners = [];
+  mem.tabUpdated = [];
+  mem.tabRemoved = [];
+  mem.openTabs = [{ id: 7, url: "https://example.com/", windowId: 1 }];
+  mem.chrome.action.setBadgeText = function (info) {
+    if (info && info.tabId != null) {
+      mem.badgeByTab[info.tabId] = info.text || "";
+    }
+    mem.chrome.action.text = (info && info.text) || "";
+  };
+  mem.chrome.action.setTitle = function (info) {
+    if (info && info.tabId != null) {
+      mem.titleByTab[info.tabId] = info.title || "";
+    }
+  };
+  mem.chrome.sidePanel.open = function () {
+    mem.sidePanelOpens += 1;
+    return Promise.resolve();
+  };
+  mem.chrome.webNavigation = {
+    onCommitted: {
+      addListener(fn) {
+        mem.navListeners.push(fn);
+      }
+    },
+    onHistoryStateUpdated: {
+      addListener() {}
+    }
+  };
+  mem.chrome.tabs.onUpdated = {
+    addListener(fn) {
+      mem.tabUpdated.push(fn);
+    }
+  };
+  mem.chrome.tabs.onRemoved = {
+    addListener(fn) {
+      mem.tabRemoved.push(fn);
+    }
+  };
+  mem.chrome.tabs.onReplaced = { addListener() {} };
+  mem.chrome.tabs.query = function (_opts, cb) {
+    cb(mem.openTabs.slice());
+  };
+  mem.chrome.tabs.get = function (id, cb) {
+    cb(mem.openTabs.find((tab) => tab.id === id) || { id: id, windowId: 1 });
+  };
+  return mem;
+}
+
+async function checkWatch() {
+  const ctx = loadScripts(["shared/scopes.js", "shared/storage.js", "shared/watch.js"], {});
+  const watch = ctx.SemblanceWatch;
+  if (!watch || typeof watch.snapshotFromUrl !== "function") {
+    errors.push("watch.js must export snapshotFromUrl");
+    return;
+  }
+
+  function expectSnap(url, check, label) {
+    const snap = watch.snapshotFromUrl(url);
+    const problem = check(snap);
+    if (problem) {
+      errors.push("live detect fail (" + label + "): " + problem);
+    }
+  }
+
+  expectSnap(
+    "https://example.com/authorize?response_type=code&scope=openid%20email%20https://www.googleapis.com/auth/gmail.readonly%20https://www.googleapis.com/auth/drive.file%20https://www.googleapis.com/auth/not.a.real.scope",
+    (snap) => {
+      if (!snap.ok || snap.kind !== "authorize") {
+        return "expected authorize, got " + JSON.stringify(snap);
+      }
+      const ids = (snap.items || []).map((item) => item.id);
+      if (ids.join() !== "openid,email,gmail.readonly,drive.file,unknown") {
+        return "ids " + ids.join();
+      }
+      if (snap.host !== "example.com") {
+        return "host";
+      }
+      if ("url" in snap || /code=/.test(JSON.stringify(snap))) {
+        return "must not store the raw URL or codes";
+      }
+      return null;
+    },
+    "generic authorize with scopes"
+  );
+
+  expectSnap(
+    "https://example.test/oauth2/v2.0/authorize?scope=User.Read+Mail.Send+offline_access",
+    (snap) => {
+      if (!snap.ok || snap.kind !== "authorize") {
+        return "expected microsoft-style authorize";
+      }
+      if (snap.items.map((item) => item.id).join() !== "user.read,mail.send,offline_access") {
+        return "ms ids";
+      }
+      return null;
+    },
+    "microsoft-style authorize path"
+  );
+
+  expectSnap(
+    "https://accounts.google.com/o/oauth2/v2/auth?client_id=demo&scope=email%20https://www.googleapis.com/auth/gmail.send",
+    (snap) => {
+      if (!snap.ok || snap.kind !== "authorize" || snap.family !== "Google") {
+        return "google authorize host";
+      }
+      if (!snap.items.some((item) => item.id === "gmail.send")) {
+        return "gmail.send missing";
+      }
+      return null;
+    },
+    "google oauth2 auth path"
+  );
+
+  expectSnap("https://example.com/devicelogin", (snap) => {
+    if (!snap.ok || snap.kind !== "device") {
+      return "example.com/devicelogin should nudge";
+    }
+    if (!snap.nudge || !/device-login/i.test(snap.nudge.sentence) || !/Allow/.test(snap.nudge.sentence)) {
+      return "device nudge sentence";
+    }
+    if (snap.items.length) {
+      return "device door has no scopes to invent";
+    }
+    return null;
+  }, "generic /devicelogin");
+
+  expectSnap("https://www.microsoft.com/devicelogin", (snap) => {
+    if (!snap.ok || snap.kind !== "device" || snap.family !== "Microsoft") {
+      return "microsoft.com/devicelogin";
+    }
+    return null;
+  }, "microsoft device login");
+
+  expectSnap("https://www.google.com/device", (snap) => {
+    if (!snap.ok || snap.kind !== "device" || snap.family !== "Google") {
+      return "google.com/device";
+    }
+    return null;
+  }, "google device login");
+
+  expectSnap("https://g.co/device", (snap) => {
+    if (!snap.ok || snap.kind !== "device") {
+      return "g.co/device";
+    }
+    return null;
+  }, "g.co/device");
+
+  expectSnap("https://aka.ms/devicelogin", (snap) => {
+    if (!snap.ok || snap.kind !== "device") {
+      return "aka.ms/devicelogin";
+    }
+    return null;
+  }, "aka.ms/devicelogin");
+
+  expectSnap("https://www.microsoft.com/devicelogin?user_code=ABCD-EFGH", (snap) => {
+    if (!snap.ok || snap.kind !== "device") {
+      return "device URL with user_code should still nudge";
+    }
+    if (/ABCD-EFGH|user_code/i.test(JSON.stringify(snap))) {
+      return "must not store a device code";
+    }
+    return null;
+  }, "device URL must not capture user_code");
+
+  expectSnap("https://example.com/help?topic=code", (snap) => {
+    if (snap.ok) {
+      return "help page must not look like Allow";
+    }
+    return null;
+  }, "no-scope help URL");
+
+  expectSnap("https://example.com/help?scope=openid", (snap) => {
+    if (snap.ok) {
+      return "scope= without authorize path must not fire";
+    }
+    return null;
+  }, "scope= on a help page");
+
+  expectSnap("https://example.com/callback?code=4/0Aean5NotARealCodeAtAll0001&scope=email", (snap) => {
+    if (snap.ok) {
+      return "code= callback is paste-ritual, not live capture";
+    }
+    return null;
+  }, "auth-code callback");
+
+  expectSnap("https://developers.google.com/devices", (snap) => {
+    if (snap.ok) {
+      return "docs page must not look like device login";
+    }
+    return null;
+  }, "google devices docs");
+
+  const mem = watchChrome();
+  const live = loadScripts(["shared/scopes.js", "shared/storage.js", "shared/watch.js"], {
+    chrome: mem.chrome
+  }).SemblanceWatch;
+  if (!live.attachWorker() || mem.navListeners.length !== 1) {
+    errors.push("attachWorker must register webNavigation.onCommitted");
+  }
+  const iframe = await live.onNavDetails({
+    tabId: 7,
+    frameId: 3,
+    url: "https://example.com/authorize?scope=email"
+  });
+  if (iframe) {
+    errors.push("iframes must not set a live Allow");
+  }
+  if (mem.sidePanelOpens) {
+    errors.push("iframe path opened the side panel");
+  }
+
+  const hit = await live.onNavDetails({
+    tabId: 7,
+    frameId: 0,
+    url: "https://example.com/authorize?scope=openid%20email%20https://www.googleapis.com/auth/gmail.readonly"
+  });
+  if (!hit || hit.kind !== "authorize" || hit.tabId !== 7) {
+    errors.push("main-frame authorize should store a per-tab decode");
+  }
+  if (mem.badgeByTab[7] !== "!") {
+    errors.push("authorize navigation must set a tab badge");
+  }
+  if (mem.sidePanelOpens) {
+    errors.push("must not open the side panel from navigation");
+  }
+  if (!mem.createdNotifications.length) {
+    errors.push("authorize navigation should offer an optional notification");
+  } else {
+    const note = mem.createdNotifications[0];
+    const blob = note.opts.title + " " + note.opts.message + " " + (note.opts.contextMessage || "");
+    if (!/Allow/.test(blob) || /score the link/i.test(blob) === false) {
+      errors.push("live notification must tell the user to open Semblance and must not score the link");
+    }
+    if (/inject|token|cookie/i.test(note.opts.message) && !/does not/.test(blob)) {
+      errors.push("live notification copy");
+    }
+  }
+  const stored = mem.sessionBucket.liveAllows && mem.sessionBucket.liveAllows["7"];
+  if (!stored) {
+    errors.push("live allow must persist in chrome.storage.session");
+  } else {
+    if (stored.url || stored.href) {
+      errors.push("session record must not keep the raw URL");
+    }
+    if (JSON.stringify(stored).includes("access_token") || /[?&]code=/.test(JSON.stringify(stored))) {
+      errors.push("session record must not keep codes or tokens");
+    }
+    if (!stored.items || stored.items.length < 3) {
+      errors.push("session record should keep the decoded map");
+    }
+  }
+  const again = await live.onUrl(7, "https://example.com/authorize?scope=openid%20email%20https://www.googleapis.com/auth/gmail.readonly");
+  if (mem.createdNotifications.length !== 1) {
+    errors.push("same fingerprint must not spam notifications");
+  }
+  if (!again || again.notified !== true) {
+    errors.push("repeat authorize should keep the existing cue");
+  }
+
+  mem.createdNotifications.length = 0;
+  const device = await live.onUrl(8, "https://example.com/devicelogin");
+  if (!device || device.kind !== "device") {
+    errors.push("device-login URL should store a nudge");
+  }
+  if (mem.badgeByTab[8] !== "!") {
+    errors.push("device-login must set a tab badge");
+  }
+  if (mem.sidePanelOpens) {
+    errors.push("device-login must not open the side panel from navigation");
+  }
+  if (!mem.createdNotifications.length) {
+    errors.push("device-login should notify once");
+  } else {
+    const blob = mem.createdNotifications[0].opts.title + " " + mem.createdNotifications[0].opts.message;
+    if (!/device-login/i.test(blob) || !/Allow/.test(blob)) {
+      errors.push("device notification copy");
+    }
+    if (/ABCD|user_code/.test(blob)) {
+      errors.push("device notification must not include a code");
+    }
+  }
+
+  const kept = await live.onUrl(7, "https://example.com/after-consent");
+  if (!kept || kept.kind !== "authorize") {
+    errors.push("same-host navigation should keep the Allow map");
+  }
+  const dropped = await live.onUrl(7, "https://wikipedia.org/");
+  if (dropped) {
+    errors.push("leaving the host should clear the tab cue");
+  }
+  if (mem.badgeByTab[7]) {
+    errors.push("cleared tab must drop the badge");
+  }
+
+  const secretStay = await live.onUrl(9, "https://example.com/callback?code=notarealcode&scope=email");
+  if (secretStay) {
+    errors.push("code= URLs must not be stored as live allows");
+  }
+}
+
 try {
   await checkLadder();
   await checkFriendVerifyWithoutSession();
   await checkEmptyStorageAndWrongWord();
   await checkRevokeRemind();
+  await checkWatch();
 } catch (err) {
   errors.push("spine runtime check failed: " + err.message);
 }
