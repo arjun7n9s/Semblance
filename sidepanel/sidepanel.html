@@ -109,6 +109,28 @@
       </div>
     </section>
 
+    <section class="panel" id="revoke-checkin">
+      <h2>Revoke check-in</h2>
+      <p>
+        Optional. Default off. A local timer that nudges you to open the official
+        connected-apps pages. Reminder only. Semblance does not watch your accounts,
+        scan grants, or ping anyone. If Chrome lists notifications, they are only for
+        this reminder you schedule.
+      </p>
+      <label for="remind-when">Remind me in</label>
+      <select id="remind-when">
+        <option value="1min">1 minute</option>
+        <option value="1hour">1 hour</option>
+        <option value="1day">1 day</option>
+        <option value="7days" selected>7 days</option>
+      </select>
+      <div class="stack remind-actions">
+        <button id="remind-on" type="button">Schedule this reminder</button>
+        <button id="remind-off" class="ghost" type="button">Turn off</button>
+      </div>
+      <p class="status" id="remind-status" role="status" aria-live="polite"></p>
+    </section>
+
     <section class="panel quiet">
       <h2>Reason log</h2>
       <p>Metadata only — time, level, reason. No page text, no tokens.</p>
@@ -122,6 +144,7 @@
     <script src="../shared/scopes.js"></script>
     <script src="../shared/rituals.js"></script>
     <script src="../shared/storage.js"></script>
+    <script src="../shared/remind.js"></script>
     <script src="sidepanel.js"></script>
   </body>
 </html>

@@ -7,7 +7,8 @@
     friendOkAt: "friendOkAt",
     reasonLog: "reasonLog",
     interruptKeys: "interruptKeys",
-    demoBeat: "demoBeat"
+    demoBeat: "demoBeat",
+    revokeRemind: "revokeRemind"
   };
 
   var LOG_CAP = 40;

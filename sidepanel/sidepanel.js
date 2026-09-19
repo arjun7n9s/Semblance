@@ -1,11 +1,7 @@
 (function () {
   "use strict";
 
-  var REVOKE = {
-    google: "https://myaccount.google.com/connections?filters=3,4",
-    microsoft: "https://account.microsoft.com/privacy/app-access",
-    microsoftWork: "https://myaccount.microsoft.com/consent"
-  };
+  var REVOKE = SemblanceRemind.REVOKE;
 
   function $(id) {
     return document.getElementById(id);
@@ -139,6 +135,40 @@
     });
   }
 
+  function refreshRemind() {
+    var status = $("remind-status");
+    var when = $("remind-when");
+    var onBtn = $("remind-on");
+    var offBtn = $("remind-off");
+    if (!status || !SemblanceRemind) {
+      return;
+    }
+    if (!SemblanceStore.available()) {
+      status.textContent = "Storage is unavailable in this window.";
+      return;
+    }
+    SemblanceRemind.read().then(function (state) {
+      if (state.on && state.choice && when) {
+        when.value = state.choice;
+      }
+      if (onBtn) {
+        onBtn.textContent = state.on ? SemblanceRemind.COPY.scheduleReplace : SemblanceRemind.COPY.scheduleIdle;
+      }
+      if (offBtn) {
+        offBtn.disabled = !state.on && !state.cue && !state.firedAt;
+      }
+      status.textContent = SemblanceRemind.statusText(state);
+      if (state.cue || state.focusCoach) {
+        var section = $("revoke-checkin");
+        if (section && typeof section.scrollIntoView === "function") {
+          section.scrollIntoView({ block: "nearest" });
+        }
+        SemblanceRemind.acknowledgeCue();
+      }
+      SemblanceRemind.ensureAlarm();
+    });
+  }
+
   function refreshGate() {
     if (!SemblanceStore.available()) {
       $("gate-status").textContent = "Storage is unavailable in this window.";
@@ -257,14 +287,35 @@
     openTab(REVOKE.microsoftWork);
   });
 
+  $("remind-on").addEventListener("click", function () {
+    var choice = $("remind-when").value;
+    SemblanceRemind.schedule(choice).then(function (state) {
+      if (!state) {
+        $("remind-status").textContent = "Pick a time first. Nothing was scheduled.";
+        return;
+      }
+      refreshRemind();
+    });
+  });
+
+  $("remind-off").addEventListener("click", function () {
+    SemblanceRemind.cancel().then(function () {
+      refreshRemind();
+    });
+  });
+
   if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.onChanged) {
     chrome.storage.onChanged.addListener(function (_changes, area) {
       if (area === "local" || area === "session") {
         refreshGate();
+        if (area === "local") {
+          refreshRemind();
+        }
       }
     });
   }
 
   renderScopes("");
   refreshGate();
+  refreshRemind();
 })();

@@ -19,10 +19,11 @@
       <h2>Keep installed</h2>
       <p>
         Leave it open next to chat. Paste a scope= URL, verify a friend, check a paste,
-        revoke.
+        revoke. Optional revoke check-in lives in the panel — default off.
       </p>
       <button id="open-panel" type="button">Open coach beside this tab</button>
       <p class="status" id="panel-status" role="status" aria-live="polite"></p>
+      <p class="status" id="remind-cue" hidden></p>
     </section>
 
     <section class="panel quiet">
@@ -37,6 +38,7 @@
     </section>
 
     <script src="../shared/storage.js"></script>
+    <script src="../shared/remind.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

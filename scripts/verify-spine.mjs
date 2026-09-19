@@ -70,6 +70,95 @@ function memoryChrome(withSession = true) {
   return { chrome, localBucket, sessionBucket };
 }
 
+function remindChrome() {
+  const mem = memoryChrome(true);
+  const alarmStore = {};
+  const createdNotifications = [];
+  const tabs = [];
+  mem.chrome.runtime = {
+    getURL(rel) {
+      return "chrome-extension://test/" + rel;
+    },
+    lastError: undefined
+  };
+  mem.chrome.alarms = {
+    create(name, info, cb) {
+      if (info && Object.prototype.hasOwnProperty.call(info, "periodInMinutes")) {
+        throw new Error("periodInMinutes is not allowed");
+      }
+      alarmStore[name] = Object.assign({ name: name }, info);
+      if (typeof cb === "function") {
+        cb();
+      }
+    },
+    get(name, cb) {
+      cb(alarmStore[name]);
+    },
+    clear(name, cb) {
+      const had = Object.prototype.hasOwnProperty.call(alarmStore, name);
+      delete alarmStore[name];
+      if (typeof cb === "function") {
+        cb(had);
+      }
+    },
+    onAlarm: {
+      listeners: [],
+      addListener(fn) {
+        this.listeners.push(fn);
+      }
+    }
+  };
+  mem.chrome.notifications = {
+    create(id, opts, cb) {
+      createdNotifications.push({ id: id, opts: opts });
+      if (typeof cb === "function") {
+        cb(id);
+      }
+    },
+    clear() {},
+    onClicked: {
+      listeners: [],
+      addListener(fn) {
+        this.listeners.push(fn);
+      }
+    },
+    onButtonClicked: {
+      listeners: [],
+      addListener(fn) {
+        this.listeners.push(fn);
+      }
+    }
+  };
+  mem.chrome.action = {
+    text: "",
+    setBadgeText(info) {
+      this.text = info.text || "";
+    },
+    setBadgeBackgroundColor() {},
+    setBadgeTextColor() {},
+    setTitle() {}
+  };
+  mem.chrome.tabs = {
+    create(info) {
+      tabs.push(info);
+    }
+  };
+  mem.chrome.windows = {
+    getLastFocused(_opts, cb) {
+      cb({ id: 1 });
+    }
+  };
+  mem.chrome.sidePanel = {
+    open() {
+      return Promise.resolve();
+    }
+  };
+  mem.alarmStore = alarmStore;
+  mem.createdNotifications = createdNotifications;
+  mem.tabs = tabs;
+  return mem;
+}
+
 const manifest = JSON.parse(read("manifest.json"));
 const errors = [];
 
@@ -83,8 +172,12 @@ if (manifest.side_panel?.default_path !== "sidepanel/sidepanel.html") {
   errors.push("side_panel.default_path must be sidepanel/sidepanel.html");
 }
 const perms = Array.isArray(manifest.permissions) ? manifest.permissions.slice().sort() : [];
-if (perms.join() !== "sidePanel,storage") {
-  errors.push("permissions must be storage and sidePanel only");
+if (perms.join() !== "alarms,notifications,sidePanel,storage") {
+  errors.push("permissions must be alarms, notifications, sidePanel, and storage");
+}
+const scaryPerms = /webNavigation|webRequest|declarativeNetRequest|identity|cookies|history|debugger|proxy|tabCapture|geolocation|scripting/;
+if ((manifest.permissions || []).some((perm) => scaryPerms.test(perm))) {
+  errors.push("no surveillance, IdP, or DNR permissions on the spine");
 }
 if (manifest.host_permissions?.length) {
   errors.push("no host_permissions on the spine");
@@ -106,6 +199,9 @@ for (const script of manifest.content_scripts || []) {
   const onlyDemo = globs.length > 0 && globs.every((glob) => /demo\/(allow|lure)\.html/.test(glob));
   if (!onlyDemo) {
     errors.push("content_scripts include_globs must stay on demo pages");
+  }
+  if ((script.js || []).some((item) => /remind/.test(item))) {
+    errors.push("content scripts must not load the revoke reminder");
   }
   const onlyFile = (script.matches || []).every((rule) => rule.startsWith("file:"));
   if (!onlyFile) {
@@ -523,7 +619,7 @@ if (!decodeChunk || /SemblanceStore|chrome\.storage|setDemoBeat|fetch\(|XMLHttpR
   errors.push("scope decode must stay local and unstored — no storage, no theater, no network");
 }
 const hiddenBeat = panelHtml.match(/id="beat-c"[^>]*hidden[\s\S]*?<\/section>/);
-if (hiddenBeat && /scope-list|scope-decode|ritual-input|check-word|revoke-google/.test(hiddenBeat[0])) {
+if (hiddenBeat && /scope-list|scope-decode|ritual-input|check-word|revoke-google|remind-when/.test(hiddenBeat[0])) {
   errors.push("keep-installed tools must not start hidden behind theater");
 }
 if (/demo\/(?:lure|allow)\.html/.test(panelJs) || /setDemoBeat/.test(panelJs)) {
@@ -533,14 +629,47 @@ const understandChunk = (panelJs.split('$("understand")')[1] || "").split('$("ri
 if (/setDemoBeat/.test(understandChunk)) {
   errors.push("I understand must not mark demoBeat — keep-installed is not theater");
 }
-if (!panelJs.includes("https://myaccount.google.com/connections")) {
+if (!/SemblanceRemind\.REVOKE/.test(panelJs)) {
+  errors.push("side panel revoke buttons must use the shared official connected-apps URLs");
+}
+
+const remindJs = read("shared/remind.js");
+const sw = read("background/service-worker.js");
+if (!/shared\/remind\.js/.test(sw) || !/SemblanceRemind\.attachWorker/.test(sw)) {
+  errors.push("service worker must import remind.js and attachWorker synchronously so alarms can wake it");
+}
+if (/alarms\.create/.test(sw) || /SemblanceRemind\.schedule/.test(sw)) {
+  errors.push("service worker must not schedule alarms — opt-in lives in the side panel");
+}
+if (/setInterval/.test(sw) || /periodInMinutes/.test(sw + remindJs)) {
+  errors.push("service worker / reminder must not keep-alive or repeat as monitoring");
+}
+if (/storage\.sync/.test(remindJs) || /storage\.session/.test(remindJs)) {
+  errors.push("revoke reminder must persist in chrome.storage.local only");
+}
+if (/fetch\(|XMLHttpRequest|WebSocket/.test(remindJs)) {
+  errors.push("revoke reminder must not network");
+}
+if (!remindJs.includes("https://myaccount.google.com/connections")) {
   errors.push("Google revoke link missing");
 }
-if (!panelJs.includes("https://account.microsoft.com/privacy/app-access")) {
+if (!remindJs.includes("https://account.microsoft.com/privacy/app-access")) {
   errors.push("Microsoft revoke link missing");
 }
-if (!panelJs.includes("https://myaccount.microsoft.com/consent")) {
+if (!remindJs.includes("https://myaccount.microsoft.com/consent")) {
   errors.push("Microsoft work revoke link missing");
+}
+if (!panelHtml.includes('id="revoke-checkin"') || !panelHtml.includes('id="remind-when"') || !panelHtml.includes('id="remind-on"') || !panelHtml.includes('id="remind-off"')) {
+  errors.push("side panel must include opt-in revoke check-in UI");
+}
+if (!/Default off/.test(panelHtml) || !/Reminder only/.test(panelHtml) || !/does not watch your accounts/.test(panelHtml)) {
+  errors.push("side panel check-in must default off and deny monitoring");
+}
+if (!panelHtml.includes("../shared/remind.js")) {
+  errors.push("side panel must load remind.js");
+}
+if (popupHtml.includes('id="remind-when"') || popupHtml.includes('id="remind-on"') || popupHtml.includes('id="remind-off"')) {
+  errors.push("popup must stay a thin launcher — check-in lives in the side panel");
 }
 
 const demoCoach = read("content/demo-coach.js");
@@ -584,10 +713,20 @@ if (!/Decode scopes/.test(read("SMOKE.md")) || !/not\.a\.real\.scope/.test(read(
 if (!/does not score that link/.test(read("SMOKE.md"))) {
   errors.push("SMOKE.md must include a no-scope URL that is not scored");
 }
+if (!/chrome\.alarms/.test(read("AUTHENTICITY.md")) || !/Reminder only/.test(read("AUTHENTICITY.md")) || !/not live monitoring/i.test(read("AUTHENTICITY.md"))) {
+  errors.push("AUTHENTICITY.md must document revoke alarms as reminder only, not monitoring");
+}
+if (!/not watching accounts/.test(read("SMOKE.md")) && !/not watching your accounts/.test(read("SMOKE.md"))) {
+  errors.push("SMOKE.md must show the check-in default-off, not watching accounts");
+}
+if (!/1 minute/.test(read("SMOKE.md")) || !/Turn off/.test(read("SMOKE.md")) || !/not live monitoring/.test(read("SMOKE.md"))) {
+  errors.push("SMOKE.md must schedule, cancel, and fire a reminder without claiming monitoring");
+}
 
 const forbiddenVoice = /TLN|Tech Literacy Network|Devpost|hackathon|contest|competition/i;
 const liveIdpHref = /https?:\/\/(accounts\.google\.com|login\.microsoftonline\.com|login\.live\.com)/i;
-const revokeAllow = new Set(["sidepanel/sidepanel.js", "README.md"]);
+const revokeAllow = new Set(["sidepanel/sidepanel.js", "README.md", "shared/remind.js"]);
+const monitoringClaim = /Semblance monitors|Semblance is watching your|parent dashboard|background surveillance|we scan your accounts/i;
 
 for (const rel of walkFiles(root)) {
   if (rel === "scripts/verify-spine.mjs") {
@@ -599,6 +738,9 @@ for (const rel of walkFiles(root)) {
   }
   if (liveIdpHref.test(text) && !revokeAllow.has(rel)) {
     errors.push("live IdP URL in " + rel);
+  }
+  if (monitoringClaim.test(text)) {
+    errors.push("monitoring claim in " + rel);
   }
 }
 
@@ -651,9 +793,12 @@ async function checkEmptyStorageAndWrongWord() {
   const ctx = loadScripts(["shared/scopes.js", "shared/rituals.js", "shared/storage.js", "shared/ladder.js"], {
     chrome: mem.chrome
   });
-  const empty = await ctx.SemblanceStore.get(["friendWord", "understoodAt", "demoBeat", "reasonLog"]);
+  const empty = await ctx.SemblanceStore.get(["friendWord", "understoodAt", "demoBeat", "reasonLog", "revokeRemind"]);
   if (empty.friendWord || empty.understoodAt || empty.demoBeat) {
     errors.push("empty storage must not invent a gate or demoBeat");
+  }
+  if (empty.revokeRemind) {
+    errors.push("empty storage must not invent a revoke reminder");
   }
   if (ctx.SemblanceScopes.filter("Mail.Send").length < 1) {
     errors.push("scope coach must work with empty storage");
@@ -686,10 +831,139 @@ async function checkEmptyStorageAndWrongWord() {
   }
 }
 
+async function checkRevokeRemind() {
+  const remindMod = loadScript("shared/remind.js").SemblanceRemind;
+  const idle = remindMod.normalize(undefined);
+  if (idle.on || idle.cue || idle.fireAt || idle.choice) {
+    errors.push("revoke remind must default off");
+  }
+  const min = remindMod.findOption("1min");
+  const hour = remindMod.findOption("1hour");
+  const day = remindMod.findOption("1day");
+  const week = remindMod.findOption("7days");
+  if (!min || min.delayMs !== 60 * 1000) {
+    errors.push("1min option must be sixty seconds for load-unpacked smoke");
+  }
+  if (!hour || hour.delayMs !== 60 * 60 * 1000) {
+    errors.push("1hour option");
+  }
+  if (!day || day.delayMs !== 24 * 60 * 60 * 1000) {
+    errors.push("1day option");
+  }
+  if (!week || week.delayMs !== 7 * 24 * 60 * 60 * 1000) {
+    errors.push("7days option must be seven days");
+  }
+  if (remindMod.OPTIONS.some((option) => option.delayMs < 60 * 1000)) {
+    errors.push("no sub-minute reminder — that looks like a keep-alive");
+  }
+  if (remindMod.buildRecord("nope")) {
+    errors.push("unknown choice must not schedule");
+  }
+  const rec = remindMod.buildRecord("7days", 1000000);
+  if (!rec || !rec.on || rec.fireAt !== 1000000 + week.delayMs || rec.cue) {
+    errors.push("7days record must be a future one-shot");
+  }
+  const copyBlob =
+    JSON.stringify(remindMod.COPY) +
+    remindMod.statusText(remindMod.emptyState()) +
+    remindMod.statusText(rec) +
+    remindMod.statusText({ firedAt: 2, on: false });
+  if (
+    !/not live monitoring/i.test(copyBlob) ||
+    !/not watching your accounts/i.test(copyBlob) ||
+    !/you asked for/i.test(copyBlob) ||
+    !/Reminder only/i.test(copyBlob)
+  ) {
+    errors.push("remind copy must say reminder they asked for, not monitoring");
+  }
+  if (/Semblance monitors|parent dashboard|background surveillance/i.test(copyBlob)) {
+    errors.push("remind copy claims monitoring");
+  }
+
+  const mem = remindChrome();
+  const ctx = loadScripts(["shared/storage.js", "shared/remind.js"], { chrome: mem.chrome });
+  const remind = ctx.SemblanceRemind;
+  const unread = await remind.read();
+  if (unread.on || unread.cue || unread.fireAt) {
+    errors.push("empty storage must not invent a revoke reminder");
+  }
+  if (!remind.attachWorker() || mem.chrome.alarms.onAlarm.listeners.length !== 1) {
+    errors.push("attachWorker must register onAlarm synchronously");
+  }
+  if (mem.chrome.notifications.onClicked.listeners.length !== 1) {
+    errors.push("attachWorker must register notification click for the coach path");
+  }
+  const scheduled = await remind.schedule("1min", 5000000);
+  if (!scheduled || !scheduled.on || !mem.alarmStore[remind.ALARM_NAME]) {
+    errors.push("schedule must persist and create a one-shot alarm");
+  }
+  const alarmInfo = mem.alarmStore[remind.ALARM_NAME];
+  if (!alarmInfo.when || Object.prototype.hasOwnProperty.call(alarmInfo, "periodInMinutes")) {
+    errors.push("alarm must use when= and must not repeat");
+  }
+  if (alarmInfo.when !== 5000000 + min.delayMs) {
+    errors.push("alarm when must match the 1min delay");
+  }
+  if (!mem.localBucket.revokeRemind || mem.localBucket.revokeRemind.on !== true) {
+    errors.push("preference must persist in chrome.storage.local");
+  }
+  if (mem.sessionBucket.revokeRemind) {
+    errors.push("revoke reminder must not use storage.session");
+  }
+  const canceled = await remind.cancel(5100000);
+  if (canceled.on || mem.alarmStore[remind.ALARM_NAME]) {
+    errors.push("cancel must clear the alarm and preference");
+  }
+  if (mem.chrome.action.text) {
+    errors.push("cancel must clear the badge");
+  }
+
+  await remind.schedule("7days", 9000000);
+  mem.createdNotifications.length = 0;
+  const ignored = await remind.onAlarm({ name: "other" });
+  if (ignored || mem.createdNotifications.length) {
+    errors.push("onAlarm must ignore other alarm names");
+  }
+  const fired = await remind.onAlarm({ name: remind.ALARM_NAME });
+  if (!fired || fired.on || !fired.cue || !fired.firedAt) {
+    errors.push("onAlarm must complete a one-shot reminder");
+  }
+  if (!mem.createdNotifications.length) {
+    errors.push("onAlarm must show a notification");
+  } else {
+    const note = mem.createdNotifications[0];
+    const blob = note.opts.title + " " + note.opts.message + " " + (note.opts.contextMessage || "");
+    if (!/you asked for/i.test(blob) || !/not live monitoring/i.test(blob) || !/not watching your accounts/i.test(blob)) {
+      errors.push("notification copy must be a reminder they asked for, not monitoring");
+    }
+    if (!note.opts.buttons || note.opts.buttons.length !== 2) {
+      errors.push("notification should offer official revoke deep-links");
+    }
+  }
+  if (mem.chrome.action.text !== "!") {
+    errors.push("onAlarm must set a calm badge");
+  }
+  mem.createdNotifications.length = 0;
+  const offFire = await remind.onAlarm({ name: remind.ALARM_NAME });
+  if (offFire !== null || mem.createdNotifications.length) {
+    errors.push("onAlarm must not re-fire after the reminder completed");
+  }
+
+  const which = await remind.onNotificationButton(remind.NOTIFICATION_ID, 0);
+  if (which !== "google" || !mem.tabs.some((tab) => /myaccount\.google\.com\/connections/.test(tab.url))) {
+    errors.push("notification button must open Google connected apps");
+  }
+  await remind.onNotificationButton(remind.NOTIFICATION_ID, 1);
+  if (!mem.tabs.some((tab) => /account\.microsoft\.com\/privacy\/app-access/.test(tab.url))) {
+    errors.push("notification button must open Microsoft app access");
+  }
+}
+
 try {
   await checkLadder();
   await checkFriendVerifyWithoutSession();
   await checkEmptyStorageAndWrongWord();
+  await checkRevokeRemind();
 } catch (err) {
   errors.push("spine runtime check failed: " + err.message);
 }

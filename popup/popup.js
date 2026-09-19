@@ -70,4 +70,15 @@
     SemblanceStore.setDemoBeat("allow");
     openTab(extensionUrl("demo/allow.html"));
   });
+
+  if (typeof SemblanceRemind !== "undefined" && SemblanceRemind.read) {
+    SemblanceRemind.read().then(function (state) {
+      var cue = $("remind-cue");
+      if (!cue || !state.cue) {
+        return;
+      }
+      cue.hidden = false;
+      cue.textContent = SemblanceRemind.COPY.popupFired;
+    });
+  }
 })();

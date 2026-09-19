@@ -104,17 +104,32 @@ label {
 
 input,
 textarea,
+select,
 button {
   font: inherit;
   color: var(--ink);
 }
 
 input,
-textarea {
+textarea,
+select {
   width: 100%;
   border: 1px solid var(--line);
   background: var(--paper-2);
   padding: 8px 10px;
+}
+
+select {
+  margin: 0 0 8px;
+}
+
+#remind-off:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.remind-actions {
+  margin-top: 2px;
 }
 
 textarea {

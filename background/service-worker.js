@@ -2,7 +2,8 @@ importScripts(
   "../shared/scopes.js",
   "../shared/rituals.js",
   "../shared/storage.js",
-  "../shared/ladder.js"
+  "../shared/ladder.js",
+  "../shared/remind.js"
 );
 
 chrome.runtime.onInstalled.addListener(function () {
@@ -48,3 +49,5 @@ chrome.runtime.onMessage.addListener(function (message, _sender, sendResponse) {
 
   return false;
 });
+
+SemblanceRemind.attachWorker();

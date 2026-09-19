@@ -21,7 +21,7 @@ Chrome 116 or newer (side panel).
 3. Turn on **Developer mode**.
 4. **Load unpacked** and pick this folder (the one with `manifest.json`).
 5. Pin **Semblance** to the toolbar.
-6. Click the icon. **Open coach beside this tab.** The side panel is the product: paste a `scope=` URL, browse scopes, friend-verify, paste ritual, revoke. You do not need the demo pages.
+6. Click the icon. **Open coach beside this tab.** The side panel is the product: paste a `scope=` URL, browse scopes, friend-verify, paste ritual, revoke, optional check-in. You do not need the demo pages.
 
 No build step. Plain JavaScript. Manifest V3.
 
@@ -62,13 +62,14 @@ That coach is the product you keep. It does not need the demo pages:
 - A denser local pack of Google and Microsoft consumer scopes → one plain sentence each
 - Friend-verify via `chrome.storage.local` (a shared word, this browser only) or an explicit I-understand
 - One-tap deep links to real Google and Microsoft connected-apps / revoke pages
+- An optional revoke check-in (`chrome.alarms`, default off) that reminds you to open those pages later — a timer you asked for, not monitoring
 - A paste box that only runs local regex rules for localhost-auth and “paste the code” rituals
 
 ## What stays useful
 
 After the three beats, leave Semblance installed.
 
-Use the side panel on a real day: paste the Allow URL, look up a scope, paste a localhost-auth ritual, verify a friend word, revoke an app you already allowed. Leave it open beside chat. The theater is optional. The translation layer is not. See [AUTHENTICITY.md](AUTHENTICITY.md) for the split, and [SMOKE.md](SMOKE.md) to walk it.
+Use the side panel on a real day: paste the Allow URL, look up a scope, paste a localhost-auth ritual, verify a friend word, revoke an app you already allowed, or schedule a revoke check-in if you want a later nudge. Leave it open beside chat. The theater is optional. The translation layer is not. See [AUTHENTICITY.md](AUTHENTICITY.md) for the split, and [SMOKE.md](SMOKE.md) to walk it.
 
 Interrupts are once-only per browser. The reason log in `storage.local` is metadata — time, level, reason. No page text. No tokens.
 
@@ -79,5 +80,6 @@ Interrupts are once-only per browser. The reason log in `storage.local` is metad
 - No Discord bot, no Azure CLI helper, no parent ping, no cloud on the critical path
 - No URL “phishing score” as the hero
 - No AI required to run the demo
+- No account scanning. The optional revoke check-in is a local timer, not monitoring.
 
 The content script, if it runs at all, may attach to the Semblance demo pages only (`demo/lure.html`, `demo/allow.html`). Real Allow screens stay untouched. Use the coach and the official revoke links instead.
