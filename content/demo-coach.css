@@ -1,0 +1,134 @@
+.semblance-chip,
+.semblance-sheet {
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+  box-sizing: border-box;
+}
+
+.semblance-chip {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483000;
+  max-width: 280px;
+  padding: 12px 14px;
+  border: 1px solid #d7c7a4;
+  background: #f4efe6;
+  color: #161310;
+  box-shadow: 0 10px 30px rgba(20, 16, 10, 0.18);
+}
+
+.semblance-chip strong {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.semblance-chip p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.semblance-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483600;
+  background: rgba(12, 9, 6, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.semblance-sheet[hidden] {
+  display: none;
+}
+
+.semblance-card {
+  width: min(460px, 100%);
+  background: #f4efe6;
+  color: #161310;
+  border: 1px solid #1b1612;
+  padding: 22px 22px 18px;
+}
+
+.semblance-fake {
+  margin: 0 0 10px;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.semblance-card h2 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  line-height: 1.1;
+  font-weight: 650;
+}
+
+.semblance-card p {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.semblance-card label {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 14px 0 6px;
+}
+
+.semblance-card input {
+  width: 100%;
+  border: 1px solid #1b1612;
+  background: #fffaf1;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.semblance-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.semblance-actions button {
+  border: 1px solid #1b1612;
+  background: #161310;
+  color: #f4efe6;
+  padding: 9px 12px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.semblance-actions button.ghost {
+  background: transparent;
+  color: #161310;
+}
+
+.semblance-note {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #5b5146;
+}
+
+.semblance-quiet {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 2147483000;
+  max-width: 280px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #d7c7a4;
+  background: #f4efe6;
+  color: #161310;
+  font: 13px/1.45 "Segoe UI", "Helvetica Neue", sans-serif;
+}
