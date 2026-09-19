@@ -23,6 +23,24 @@
     window.open(url, "_blank", "noopener");
   }
 
+  function appendScopeRow(list, scope, token) {
+    var li = document.createElement("li");
+    var meta = document.createElement("span");
+    var raw = document.createElement("code");
+    var sentence = document.createElement("span");
+    li.className = "scope heat-" + scope.heat;
+    meta.className = "meta";
+    meta.textContent = scope.family + " · " + scope.heat;
+    raw.className = "raw";
+    raw.textContent = token || scope.raw;
+    sentence.className = "sentence";
+    sentence.textContent = scope.sentence;
+    li.appendChild(meta);
+    li.appendChild(raw);
+    li.appendChild(sentence);
+    list.appendChild(li);
+  }
+
   function renderScopes(query) {
     var list = $("scope-list");
     var rows = SemblanceScopes.filter(query);
@@ -32,21 +50,43 @@
       return;
     }
     rows.forEach(function (scope) {
-      var li = document.createElement("li");
-      var meta = document.createElement("span");
-      var raw = document.createElement("code");
-      var sentence = document.createElement("span");
-      li.className = "scope heat-" + scope.heat;
-      meta.className = "meta";
-      meta.textContent = scope.family + " · " + scope.heat;
-      raw.className = "raw";
-      raw.textContent = scope.raw;
-      sentence.className = "sentence";
-      sentence.textContent = scope.sentence;
-      li.appendChild(meta);
-      li.appendChild(raw);
-      li.appendChild(sentence);
-      list.appendChild(li);
+      appendScopeRow(list, scope);
+    });
+  }
+
+  function renderDecoded(result) {
+    var list = $("scope-decoded");
+    var status = $("scope-decode-status");
+    var unknownBit;
+    list.innerHTML = "";
+    if (!result.ok) {
+      list.hidden = true;
+      if (result.reason === "empty") {
+        status.textContent = "Paste an Allow URL or a scope= query first. Nothing was stored.";
+        return;
+      }
+      if (result.reason === "empty-scope") {
+        status.textContent = "That paste has an empty scope=. Nothing to translate. Nothing was stored.";
+        return;
+      }
+      status.textContent =
+        "No scope= in that paste. Semblance does not score links. Paste an Allow URL or a scope list.";
+      return;
+    }
+    list.hidden = false;
+    unknownBit =
+      result.unknown === 0
+        ? "None unknown."
+        : result.unknown === 1
+          ? "1 unknown."
+          : result.unknown + " unknown.";
+    status.textContent =
+      result.items.length +
+      (result.items.length === 1 ? " scope from that paste. " : " scopes from that paste. ") +
+      unknownBit +
+      " Nothing was stored. This is not a link score.";
+    result.items.forEach(function (scope) {
+      appendScopeRow(list, scope, scope.token);
     });
   }
 
@@ -135,6 +175,17 @@
 
   $("scope-query").addEventListener("input", function (event) {
     renderScopes(event.target.value);
+  });
+
+  $("scope-decode").addEventListener("click", function () {
+    renderDecoded(SemblanceScopes.decode($("scope-decode-input").value));
+  });
+
+  $("scope-decode-input").addEventListener("keydown", function (event) {
+    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+      event.preventDefault();
+      $("scope-decode").click();
+    }
   });
 
   $("save-word").addEventListener("click", function () {

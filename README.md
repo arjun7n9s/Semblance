@@ -21,7 +21,7 @@ Chrome 116 or newer (side panel).
 3. Turn on **Developer mode**.
 4. **Load unpacked** and pick this folder (the one with `manifest.json`).
 5. Pin **Semblance** to the toolbar.
-6. Click the icon. **Open coach beside this tab.** The side panel is the product: scopes, friend-verify, paste ritual, revoke. You do not need the demo pages.
+6. Click the icon. **Open coach beside this tab.** The side panel is the product: paste a `scope=` URL, browse scopes, friend-verify, paste ritual, revoke. You do not need the demo pages.
 
 No build step. Plain JavaScript. Manifest V3.
 
@@ -58,7 +58,8 @@ Open the side panel from the toolbar popup if it is not already beside the tab.
 
 That coach is the product you keep. It does not need the demo pages:
 
-- ~15 common Google and Microsoft scopes → one plain sentence each
+- Paste an Allow URL or `scope=` query → the same plain-language map as the click (unknown stays unknown)
+- A denser local pack of Google and Microsoft consumer scopes → one plain sentence each
 - Friend-verify via `chrome.storage.local` (a shared word, this browser only) or an explicit I-understand
 - One-tap deep links to real Google and Microsoft connected-apps / revoke pages
 - A paste box that only runs local regex rules for localhost-auth and “paste the code” rituals
@@ -67,7 +68,7 @@ That coach is the product you keep. It does not need the demo pages:
 
 After the three beats, leave Semblance installed.
 
-Use the side panel on a real day: look up a scope, paste a suspicious localhost URL, verify a friend word, revoke an app you already allowed. Leave it open beside chat. The theater is optional. The translation layer is not. See [AUTHENTICITY.md](AUTHENTICITY.md) for the split, and [SMOKE.md](SMOKE.md) to walk it.
+Use the side panel on a real day: paste the Allow URL, look up a scope, paste a localhost-auth ritual, verify a friend word, revoke an app you already allowed. Leave it open beside chat. The theater is optional. The translation layer is not. See [AUTHENTICITY.md](AUTHENTICITY.md) for the split, and [SMOKE.md](SMOKE.md) to walk it.
 
 Interrupts are once-only per browser. The reason log in `storage.local` is metadata — time, level, reason. No page text. No tokens.
 

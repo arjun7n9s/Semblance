@@ -14,7 +14,7 @@ Semblance is a local coach for the Allow click. The three-beat walkthrough is la
 
 The **side panel** is the product surface. Open it from the toolbar popup (**Open coach beside this tab**) on an empty day. A stranger should not need the lure or the FAKE Allow pages to understand or use it:
 
-- **Scope coach** — a local dictionary of common Google and Microsoft OAuth scopes, each in one plain sentence. Not scraped. Not live.
+- **Scope coach** — paste an authorize URL or a `scope=` query. Semblance maps those tokens through a local dictionary of common Google and Microsoft OAuth scopes, each in one plain sentence. Unknown tokens stay unknown. Not scraped. Not live. Not a URL score.
 - **Friend-verify** — save a shared word and type it in the panel, or tap I understand. This browser only. No ping. This does not freeze a live login page. It is a pause you take before Allow. The labeled FAKE Allow uses the same word during optional theater.
 - **Paste ritual** — local regex on what you paste (localhost redirects, auth codes, token-shaped strings). Nothing is stored. Nothing is sent.
 - **Revoke** — official Google and Microsoft connected-apps pages. Semblance does not revoke for you.

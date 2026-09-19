@@ -28,15 +28,29 @@
       <h2>Use this now</h2>
       <p>
         Someone asked you to click Allow, paste a code, or keep an app you already
-        granted. Read the scopes. Verify a person in the room — or own the click.
-        Check a paste before you open it. Revoke if you already allowed. Nothing
-        here talks to Google or Microsoft login. Real Allow screens stay untouched.
+        granted. Paste the Allow URL and read the scopes. Verify a person in the
+        room — or own the click. Check a paste ritual before you open it. Revoke if
+        you already allowed. Nothing here talks to Google or Microsoft login. Real
+        Allow screens stay untouched.
       </p>
     </section>
 
     <section class="panel">
       <h2>Scope coach</h2>
-      <p>Common Google and Microsoft OAuth scopes, one plain sentence each.</p>
+      <p>
+        Paste an Allow URL or a <code>scope=</code> query. Semblance translates those
+        scopes — the same map as the click. It does not score the link.
+      </p>
+      <label for="scope-decode-input">Authorize URL or scope= query</label>
+      <textarea
+        id="scope-decode-input"
+        rows="4"
+        placeholder="https://example.test/authorize?scope=openid email https://www.googleapis.com/auth/gmail.send"
+      ></textarea>
+      <button id="scope-decode" type="button">Decode scopes</button>
+      <p class="status" id="scope-decode-status" role="status" aria-live="polite"></p>
+      <ol id="scope-decoded" hidden></ol>
+      <p class="browse-kicker">Or browse the local list</p>
       <label for="scope-query">Find a scope</label>
       <input id="scope-query" type="search" placeholder="gmail, Mail.Send, drive…" />
       <ol id="scope-list"></ol>

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Semblance",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "minimum_chrome_version": "116",
   "description": "Pause at Allow. Read the scopes in plain language. Verify a friend. Revoke in one tap.",
   "icons": {

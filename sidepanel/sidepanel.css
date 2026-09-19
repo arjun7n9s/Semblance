@@ -175,6 +175,7 @@ button.ghost {
 }
 
 #scope-list,
+#scope-decoded,
 #ritual-hits,
 #reason-log {
   list-style: none;
@@ -183,6 +184,7 @@ button.ghost {
 }
 
 #scope-list li,
+#scope-decoded li,
 #ritual-hits li,
 #reason-log li {
   padding: 10px 0;
@@ -190,6 +192,7 @@ button.ghost {
 }
 
 #scope-list .meta,
+#scope-decoded .meta,
 .raw {
   display: block;
   font-size: 11px;
@@ -197,18 +200,36 @@ button.ghost {
   margin-bottom: 3px;
 }
 
-#scope-list .meta {
+#scope-list .meta,
+#scope-decoded .meta {
   text-transform: uppercase;
   color: var(--mute);
 }
 
-#scope-list .raw {
+#scope-list .raw,
+#scope-decoded .raw {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 12px;
   letter-spacing: 0;
   text-transform: none;
   color: var(--ink);
   overflow-wrap: anywhere;
+}
+
+.browse-kicker {
+  margin: 14px 0 0;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+#scope-decode {
+  margin-top: 8px;
+}
+
+#scope-decoded:not([hidden]) {
+  margin-top: 4px;
 }
 
 .sentence {
@@ -229,6 +250,16 @@ button.ghost {
 .heat-low .raw,
 .heat-low .meta {
   color: var(--low);
+}
+
+.heat-unknown .meta,
+.heat-unknown .raw {
+  color: var(--mute);
+}
+
+#scope-decoded .heat-unknown {
+  padding-left: 10px;
+  border-left: 3px solid var(--mute);
 }
 
 #ritual-hits .hit {

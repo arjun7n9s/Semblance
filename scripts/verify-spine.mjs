@@ -125,30 +125,66 @@ const knownScopeIds = new Set([
   "gmail.readonly",
   "gmail.send",
   "gmail.modify",
+  "gmail.compose",
+  "gmail.metadata",
+  "mail.google.com",
   "drive",
   "drive.file",
+  "drive.readonly",
   "calendar",
+  "calendar.readonly",
   "contacts",
+  "contacts.readonly",
+  "photoslibrary.readonly",
+  "youtube.upload",
+  "documents",
+  "spreadsheets",
+  "classroom.rosters.readonly",
+  "classroom.coursework.me",
+  "user.phonenumbers.read",
+  "user.addresses.read",
+  "chat.messages.readonly",
   "cloud-platform",
   "user.read",
+  "user.readwrite",
   "mail.read",
+  "mail.readbasic",
   "mail.send",
   "mailbox.readwrite",
+  "imap.accessasuser.all",
+  "smtp.send",
+  "files.read",
+  "files.readwrite",
+  "files.read.all",
   "files.readwrite.all",
+  "calendars.read",
   "calendars.readwrite",
   "contacts.read",
+  "contacts.readwrite",
+  "chat.read",
+  "chat.readwrite",
   "directory.read.all"
 ]);
 const jokeVoice = /lolz|yeet|hackathon|devpost|skeleton-key-lol|totally-fine/i;
+const enterpriseDump =
+  /RoleManagement|Application\.ReadWrite|Policy\.ReadWrite|Sites\.FullControl|Directory\.ReadWrite|AppRoleAssignment|IdentityRisky|PrivilegedAccess/i;
 const scopes = loadScript("shared/scopes.js").SemblanceScopes;
-if (!scopes || scopes.all.length < 15) {
-  errors.push("need at least 15 scope translations");
+if (!scopes || scopes.all.length < 35) {
+  errors.push("need a denser pack: at least 35 scope translations");
+}
+if (typeof scopes.decode !== "function" || typeof scopes.explain !== "function") {
+  errors.push("scopes.js must export decode and explain");
 }
 const families = new Set(["Google", "Microsoft", "Either"]);
+const seenScopeIds = new Set();
 for (const scope of scopes.all) {
   if (!knownScopeIds.has(scope.id)) {
     errors.push("unknown/invented scope id " + scope.id);
   }
+  if (seenScopeIds.has(scope.id)) {
+    errors.push("duplicate scope id " + scope.id);
+  }
+  seenScopeIds.add(scope.id);
   if (!families.has(scope.family)) {
     errors.push("scope family must be Google, Microsoft, or Either: " + scope.id);
   }
@@ -158,6 +194,14 @@ for (const scope of scopes.all) {
   if (jokeVoice.test(scope.sentence) || jokeVoice.test(scope.raw)) {
     errors.push("scope sentence/raw looks like joke filler: " + scope.id);
   }
+  if (enterpriseDump.test(scope.id) || enterpriseDump.test(scope.raw)) {
+    errors.push("enterprise SOC dump in scope pack: " + scope.id);
+  }
+}
+for (const id of ["gmail.compose", "mail.google.com", "photoslibrary.readonly", "classroom.rosters.readonly", "imap.accessasuser.all", "mail.readbasic"]) {
+  if (!seenScopeIds.has(id)) {
+    errors.push("denser pack missing consumer scope " + id);
+  }
 }
 const driveFile = scopes.findByRaw("drive.file");
 if (!driveFile || /full Drive/i.test(driveFile.sentence)) {
@@ -166,6 +210,173 @@ if (!driveFile || /full Drive/i.test(driveFile.sentence)) {
 const driveFull = scopes.findByRaw("drive");
 if (!driveFull || driveFull.id !== "drive") {
   errors.push("findByRaw('drive') must return full Drive, not drive.file");
+}
+
+function expectDecode(sample, check, label) {
+  const result = scopes.decode(sample);
+  const problem = check(result);
+  if (problem) {
+    errors.push("decode fail (" + label + "): " + problem);
+  }
+}
+
+expectDecode(
+  "https://example.test/authorize?client_id=demo&response_type=code&scope=openid%20email%20https://www.googleapis.com/auth/gmail.readonly%20https://www.googleapis.com/auth/drive.file%20https://www.googleapis.com/auth/not.a.real.scope&access_type=offline",
+  (result) => {
+    if (!result.ok) {
+      return "expected ok, got " + result.reason;
+    }
+    if (result.via !== "url") {
+      return "expected via=url, got " + result.via;
+    }
+    const ids = result.items.map((item) => item.id);
+    if (ids.join() !== "openid,email,gmail.readonly,drive.file,unknown") {
+      return "unexpected ids " + ids.join();
+    }
+    if (result.items[2].known !== true || !/every email/i.test(result.items[2].sentence)) {
+      return "gmail.readonly URL must use the real sentence, not a guess";
+    }
+    if (result.items[3].id !== "drive.file") {
+      return "drive.file URL must not collapse to full Drive";
+    }
+    if (result.items[4].known !== false || result.items[4].family !== "Unknown") {
+      return "unknown scope must stay unknown";
+    }
+    if (result.items[4].sentence !== scopes.unknownSentence) {
+      return "unknown sentence must be the honest stub";
+    }
+    if (result.unknown !== 1 || result.known !== 4) {
+      return "known/unknown counts wrong: " + result.known + "/" + result.unknown;
+    }
+    return null;
+  },
+  "google-style authorize URL"
+);
+
+expectDecode(
+  "https://example.test/oauth2/v2.0/authorize?scope=User.Read+Mail.Send+offline_access",
+  (result) => {
+    if (!result.ok) {
+      return "expected ok";
+    }
+    const ids = result.items.map((item) => item.id);
+    if (ids.join() !== "user.read,mail.send,offline_access") {
+      return "plus-delimited Microsoft scopes: " + ids.join();
+    }
+    if (result.unknown !== 0) {
+      return "no unknowns expected";
+    }
+    return null;
+  },
+  "plus-delimited Microsoft scope="
+);
+
+expectDecode(
+  "Maya sent this:\nhttps://example.test/authorize?redirect_uri=https%3A%2F%2Fapp.example%2Fcb&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive%20https%3A%2F%2Fgraph.microsoft.com%2FMail.Read&amp;state=1\nthx",
+  (result) => {
+    if (!result.ok) {
+      return "expected ok from chat wrap, got " + result.reason;
+    }
+    const ids = result.items.map((item) => item.id);
+    if (ids.join() !== "drive,mail.read") {
+      return "chat wrap ids " + ids.join();
+    }
+    if (result.items[0].id !== "drive") {
+      return "full Drive URL must stay Drive, not drive.file";
+    }
+    return null;
+  },
+  "chat wrap + encoded scopes + amp;"
+);
+
+expectDecode("scope=openid+email+profile", (result) => {
+  if (!result.ok || result.via !== "query") {
+    return "raw query should decode, via=" + result.via;
+  }
+  if (result.items.map((item) => item.id).join() !== "openid,email,profile") {
+    return "raw query ids";
+  }
+  return null;
+}, "raw scope= query");
+
+expectDecode(
+  "openid email https://www.googleapis.com/auth/gmail.send Mail.Send",
+  (result) => {
+    if (!result.ok || result.via !== "list") {
+      return "bare list should decode, via=" + result.via;
+    }
+    if (result.items.map((item) => item.id).join() !== "openid,email,gmail.send,mail.send") {
+      return "bare list ids";
+    }
+    return null;
+  },
+  "bare scope list"
+);
+
+expectDecode("https://example.com/help?topic=code", (result) => {
+  if (result.ok || result.reason !== "no-scope") {
+    return "URL without scope= must not invent scopes";
+  }
+  return null;
+}, "no-scope URL");
+
+expectDecode("hello from the class group", (result) => {
+  if (result.ok) {
+    return "sentence must not look like a scope list";
+  }
+  return null;
+}, "chat sentence");
+
+expectDecode("", (result) => {
+  if (result.ok || result.reason !== "empty") {
+    return "empty paste";
+  }
+  return null;
+}, "empty");
+
+expectDecode("https://example.test/authorize?scope=&client_id=x", (result) => {
+  if (result.ok || result.reason !== "empty-scope") {
+    return "empty scope=";
+  }
+  return null;
+}, "empty scope=");
+
+expectDecode(
+  "https://example.test/cb#scope=email%20profile&token_type=Bearer",
+  (result) => {
+    if (!result.ok) {
+      return "hash scope should decode";
+    }
+    if (result.items.map((item) => item.id).join() !== "email,profile") {
+      return "hash ids";
+    }
+    return null;
+  },
+  "fragment scope="
+);
+
+const unknownExplain = scopes.explain("https://www.googleapis.com/auth/gmail.readonly.extra");
+if (unknownExplain.known || unknownExplain.id !== "unknown") {
+  errors.push("explain must not substring-match gmail.readonly onto a longer token");
+}
+if (/every email/i.test(unknownExplain.sentence)) {
+  errors.push("unknown explain must not reuse a known sentence");
+}
+const driveUrl = scopes.explain("https://www.googleapis.com/auth/drive");
+if (!driveUrl.known || driveUrl.id !== "drive") {
+  errors.push("explain(drive URL) must be full Drive");
+}
+const userinfo = scopes.explain("https://www.googleapis.com/auth/userinfo.email");
+if (!userinfo.known || userinfo.id !== "email") {
+  errors.push("explain(userinfo.email URL) must map to email");
+}
+const graphMail = scopes.explain("https://graph.microsoft.com/Mail.Send");
+if (!graphMail.known || graphMail.id !== "mail.send") {
+  errors.push("explain(graph Mail.Send) must map to mail.send");
+}
+const imapOutlook = scopes.explain("https://outlook.office.com/IMAP.AccessAsUser.All");
+if (!imapOutlook.known || imapOutlook.id !== "imap.accessasuser.all") {
+  errors.push("explain(outlook IMAP) must map to imap.accessasuser.all");
 }
 
 const rituals = loadScript("shared/rituals.js").SemblanceRituals;
@@ -276,6 +487,9 @@ if (!/windows\.getCurrent/.test(popupJs)) {
 if (popupHtml.includes('id="ritual-input"') || popupHtml.includes('id="scope-list"') || popupHtml.includes("revoke-google")) {
   errors.push("popup must stay a thin launcher — keep-installed tools live in the side panel");
 }
+if (popupHtml.includes('id="scope-decode"') || popupHtml.includes('id="scope-decode-input"')) {
+  errors.push("popup must stay a thin launcher — scope decoder lives in the side panel");
+}
 if (!popupHtml.includes('id="open-lure"') || !popupHtml.includes('id="open-allow"')) {
   errors.push("popup must still launch Beat A and Beat B");
 }
@@ -292,8 +506,24 @@ if (!panelHtml.includes('id="check-word"') || !/checkFriendWord/.test(panelJs)) 
 if (!panelHtml.includes('id="ritual-input"') || !panelHtml.includes("revoke-google") || !panelHtml.includes('id="scope-list"')) {
   errors.push("side panel keep-installed must include scope coach, paste ritual, and revoke");
 }
+if (!panelHtml.includes('id="scope-decode-input"') || !panelHtml.includes('id="scope-decode"') || !panelHtml.includes('id="scope-decoded"')) {
+  errors.push("side panel must paste/decode authorize URLs and scope= queries");
+}
+if (!/does not score the link/.test(panelHtml)) {
+  errors.push("side panel must say the decoder does not score the link");
+}
+if (/phish|reputation|safe to open|malicious link|url score/i.test(panelHtml + panelJs)) {
+  errors.push("side panel decoder must not be a URL-score / phishing-score hero");
+}
+if (!/SemblanceScopes\.decode/.test(panelJs) || !/scope-decode-input/.test(panelJs)) {
+  errors.push("side panel must run SemblanceScopes.decode on the paste field");
+}
+const decodeChunk = (panelJs.split('$("scope-decode")')[1] || "").split('$("save-word")')[0];
+if (!decodeChunk || /SemblanceStore|chrome\.storage|setDemoBeat|fetch\(|XMLHttpRequest/.test(decodeChunk)) {
+  errors.push("scope decode must stay local and unstored — no storage, no theater, no network");
+}
 const hiddenBeat = panelHtml.match(/id="beat-c"[^>]*hidden[\s\S]*?<\/section>/);
-if (hiddenBeat && /scope-list|ritual-input|check-word|revoke-google/.test(hiddenBeat[0])) {
+if (hiddenBeat && /scope-list|scope-decode|ritual-input|check-word|revoke-google/.test(hiddenBeat[0])) {
   errors.push("keep-installed tools must not start hidden behind theater");
 }
 if (/demo\/(?:lure|allow)\.html/.test(panelJs) || /setDemoBeat/.test(panelJs)) {
@@ -344,6 +574,15 @@ if (!/Open coach beside this tab/.test(read("SMOKE.md"))) {
 }
 if (!/side panel/i.test(read("AUTHENTICITY.md")) || !/product surface/i.test(read("AUTHENTICITY.md"))) {
   errors.push("AUTHENTICITY.md must name the side panel as the product surface");
+}
+if (!/Not a URL score/i.test(read("AUTHENTICITY.md")) || !/Unknown tokens stay unknown/i.test(read("AUTHENTICITY.md"))) {
+  errors.push("AUTHENTICITY.md must describe the decoder as local literacy, not a URL score");
+}
+if (!/Decode scopes/.test(read("SMOKE.md")) || !/not\.a\.real\.scope/.test(read("SMOKE.md"))) {
+  errors.push("SMOKE.md must decode a scope= URL with an unknown token, demo tabs closed");
+}
+if (!/does not score that link/.test(read("SMOKE.md"))) {
+  errors.push("SMOKE.md must include a no-scope URL that is not scored");
 }
 
 const forbiddenVoice = /TLN|Tech Literacy Network|Devpost|hackathon|contest|competition/i;
@@ -418,6 +657,12 @@ async function checkEmptyStorageAndWrongWord() {
   }
   if (ctx.SemblanceScopes.filter("Mail.Send").length < 1) {
     errors.push("scope coach must work with empty storage");
+  }
+  const decoded = ctx.SemblanceScopes.decode(
+    "https://example.test/authorize?scope=Mail.Send+https://www.googleapis.com/auth/gmail.readonly"
+  );
+  if (!decoded.ok || decoded.unknown !== 0 || decoded.items.length !== 2) {
+    errors.push("scope decode must work with empty storage");
   }
   if (ctx.SemblanceRituals.inspect("hello").length !== 0) {
     errors.push("paste with no match must stay empty");
