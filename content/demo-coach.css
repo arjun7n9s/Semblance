@@ -54,6 +54,15 @@
   padding: 22px 22px 18px;
 }
 
+.semblance-fake {
+  margin: 0 0 10px;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .semblance-card h2 {
   margin: 0 0 8px;
   font-size: 26px;

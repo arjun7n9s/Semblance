@@ -5,6 +5,17 @@
   var allowBtn = document.getElementById("allow-btn");
   var denyBtn = document.getElementById("deny-btn");
 
+  document.querySelectorAll("[data-scope]").forEach(function (li) {
+    var scope = window.SemblanceScopes && SemblanceScopes.findByRaw(li.getAttribute("data-scope"));
+    var code = li.querySelector("code");
+    var line = li.querySelector("p");
+    if (!scope || !code || !line) {
+      return;
+    }
+    code.textContent = scope.raw;
+    line.textContent = scope.sentence;
+  });
+
   function showAftermath(fromDeny) {
     aftermath.hidden = false;
     if (fromDeny) {

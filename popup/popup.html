@@ -22,15 +22,23 @@
 
     <section class="panel">
       <h2>Friend verify</h2>
-      <p>Two ways to open the gate. Both stay in this browser. No server. No ping.</p>
+      <p>
+        Two ways to open the gate. Both stay in this browser. No server. No ping. Works with every
+        demo tab closed. The labeled FAKE Allow uses this same gate during theater.
+      </p>
 
       <div class="choice">
         <p class="choice-kicker">Shared word</p>
-        <p>Save a word together. On the fake Allow, type it to prove a real person is in the room.</p>
-        <label for="friend-word">Shared word</label>
+        <p>Save a word together, then type it here. A real person in the room — not a chat message.</p>
+        <label for="friend-word">Save a shared word</label>
         <div class="row">
           <input id="friend-word" type="text" autocomplete="off" spellcheck="false" />
           <button id="save-word" type="button">Save word</button>
+        </div>
+        <label for="friend-check">Type it to verify</label>
+        <div class="row">
+          <input id="friend-check" type="text" autocomplete="off" spellcheck="false" />
+          <button id="check-word" type="button">Verify</button>
         </div>
       </div>
 
@@ -73,7 +81,10 @@
 
     <section class="panel">
       <h2>Three-beat theater</h2>
-      <p>Recommended path after Load unpacked: Beat A, then Maya’s LabQueue link, then this popup.</p>
+      <p>
+        Optional labeled walkthrough. The coach above does not need these pages. Beat A, then Maya’s
+        LabQueue link, then this popup.
+      </p>
       <div class="stack">
         <button id="open-lure" type="button">Open Beat A · friend lure</button>
         <button id="open-allow" class="ghost" type="button">Open Beat B · fake Allow</button>

@@ -53,17 +53,24 @@
     },
     {
       id: "drive",
-      raw: "drive / drive.file (full Drive)",
+      raw: "drive",
       family: "Google",
       heat: "high",
       sentence: "Can open and change files in Drive — homework, IDs, shared folders."
+    },
+    {
+      id: "drive.file",
+      raw: "drive.file",
+      family: "Google",
+      heat: "mid",
+      sentence: "Can only touch Drive files this app creates or that you pick. Not the rest of Drive."
     },
     {
       id: "calendar",
       raw: "calendar",
       family: "Google",
       heat: "mid",
-      sentence: "Can see and edit your calendar, including where you will be."
+      sentence: "Can see and change your calendar, including where you will be."
     },
     {
       id: "contacts",
@@ -101,6 +108,13 @@
       sentence: "Can send Outlook mail as you."
     },
     {
+      id: "mailbox.readwrite",
+      raw: "Mail.ReadWrite",
+      family: "Microsoft",
+      heat: "high",
+      sentence: "Can read and change your mail, including deleting the evidence."
+    },
+    {
       id: "files.readwrite.all",
       raw: "Files.ReadWrite.All",
       family: "Microsoft",
@@ -108,30 +122,46 @@
       sentence: "Can change files you can reach in OneDrive or SharePoint."
     },
     {
+      id: "calendars.readwrite",
+      raw: "Calendars.ReadWrite",
+      family: "Microsoft",
+      heat: "mid",
+      sentence: "Can see and change Outlook calendar events, including where you will be."
+    },
+    {
+      id: "contacts.read",
+      raw: "Contacts.Read",
+      family: "Microsoft",
+      heat: "high",
+      sentence: "Can read the people in your Outlook address book."
+    },
+    {
       id: "directory.read.all",
       raw: "Directory.Read.All",
       family: "Microsoft",
       heat: "high",
       sentence: "Can list people and groups across the whole org — not just you."
-    },
-    {
-      id: "mailbox.readwrite",
-      raw: "Mail.ReadWrite",
-      family: "Microsoft",
-      heat: "high",
-      sentence: "Can read and change your mail, including deleting the evidence."
     }
   ];
 
   function findByRaw(raw) {
     var needle = String(raw || "").toLowerCase();
     var i;
+    var scope;
+    var includes = null;
+    if (!needle) {
+      return null;
+    }
     for (i = 0; i < SCOPES.length; i += 1) {
-      if (SCOPES[i].raw.toLowerCase().indexOf(needle) !== -1 || SCOPES[i].id === needle) {
-        return SCOPES[i];
+      scope = SCOPES[i];
+      if (scope.id.toLowerCase() === needle || scope.raw.toLowerCase() === needle) {
+        return scope;
+      }
+      if (!includes && scope.raw.toLowerCase().indexOf(needle) !== -1) {
+        includes = scope;
       }
     }
-    return null;
+    return includes;
   }
 
   function filter(query) {

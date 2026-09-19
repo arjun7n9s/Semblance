@@ -66,6 +66,11 @@
         ? "MFA never ran. The click is the whole grant. Type the shared word from the popup, or tap I understand — this browser only, no ping."
         : "These permissions are written in jargon so they look normal. Semblance translates them. Confirm with the shared word, or say you understand.";
 
+    if (beat === "allow") {
+      card.appendChild(
+        el("p", { class: "semblance-fake" }, "FAKE — not Google/Microsoft. LabQueue is a prop.")
+      );
+    }
     card.appendChild(el("h2", null, title));
     card.appendChild(el("p", null, body));
 

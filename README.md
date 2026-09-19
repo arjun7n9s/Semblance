@@ -19,11 +19,14 @@ Semblance treats that click as the event worth interrupting.
 3. Turn on **Developer mode**.
 4. **Load unpacked** and pick this folder (the one with `manifest.json`).
 5. Pin **Semblance** to the toolbar.
-6. Click the icon. Press **Open Beat A · friend lure**.
+6. Click the icon. The popup is the product: scopes, friend-verify, paste ritual, revoke. You do not need the demo pages.
 
 No build step. Plain JavaScript. Manifest V3.
 
-That button opens `chrome-extension://…/demo/lure.html`. You do not need “Allow access to file URLs.” File copies of the demo pages are a fallback only.
+Theater is optional and labeled. **Open Beat A · friend lure** opens `chrome-extension://…/demo/lure.html`. You do not need “Allow access to file URLs.” File copies of the demo pages are a fallback only.
+
+- What is theater vs what stays installed: [AUTHENTICITY.md](AUTHENTICITY.md)
+- Human Load-unpacked pass: [SMOKE.md](SMOKE.md)
 
 Optional check after clone: `node scripts/verify-spine.mjs`.
 
@@ -62,7 +65,7 @@ That coach is the product you keep. It does not need the demo pages:
 
 After the three beats, leave Semblance installed.
 
-Use the popup on a real day: look up a scope, paste a suspicious localhost URL, revoke an app you already allowed. The theater is optional. The translation layer is not.
+Use the popup on a real day: look up a scope, paste a suspicious localhost URL, verify a friend word, revoke an app you already allowed. The theater is optional. The translation layer is not. See [AUTHENTICITY.md](AUTHENTICITY.md) for the split, and [SMOKE.md](SMOKE.md) to walk it.
 
 Interrupts are once-only per browser. The reason log in `storage.local` is metadata — time, level, reason. No page text. No tokens.
 

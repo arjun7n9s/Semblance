@@ -125,7 +125,7 @@
             $("gate-status").textContent = "Gate open: friend word verified in this browser.";
           } else if (data.friendWord) {
             $("gate-status").textContent =
-              "Shared word saved locally. Type it on the fake Allow to open the gate.";
+              "Shared word saved locally. Type it below to verify — or on the labeled FAKE Allow during theater.";
           } else {
             $("gate-status").textContent = "No gate yet. Save a word or tap I understand.";
           }
@@ -157,9 +157,38 @@
     }
   });
 
+  $("check-word").addEventListener("click", function () {
+    var attempt = $("friend-check").value;
+    if (!SemblanceStore.available()) {
+      $("gate-status").textContent = "Storage is unavailable in this window.";
+      return;
+    }
+    SemblanceStore.get(["friendWord"]).then(function (data) {
+      if (!data.friendWord) {
+        $("gate-status").textContent = "Save a shared word first. Nothing was sent.";
+        return;
+      }
+      SemblanceStore.checkFriendWord(attempt).then(function (ok) {
+        if (!ok) {
+          $("gate-status").textContent =
+            "No match. The word stays in this browser only — nothing was sent.";
+          return;
+        }
+        $("friend-check").value = "";
+        refreshGate();
+      });
+    });
+  });
+
+  $("friend-check").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      $("check-word").click();
+    }
+  });
+
   $("understand").addEventListener("click", function () {
     SemblanceStore.setUnderstood().then(function () {
-      SemblanceStore.setDemoBeat("coach");
       refreshGate();
     });
   });
