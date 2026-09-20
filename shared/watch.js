@@ -351,7 +351,7 @@
       action.setBadgeText({ tabId: tabId, text: on ? COPY.badgeText : "" });
     }
     if (on && typeof action.setBadgeBackgroundColor === "function") {
-      action.setBadgeBackgroundColor({ tabId: tabId, color: "#5c5247" });
+      action.setBadgeBackgroundColor({ tabId: tabId, color: "#b42318" });
     }
     if (on && typeof action.setBadgeTextColor === "function") {
       try {
