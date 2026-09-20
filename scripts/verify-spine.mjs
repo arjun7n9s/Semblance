@@ -226,23 +226,53 @@ const knownScopeIds = new Set([
   "gmail.modify",
   "gmail.compose",
   "gmail.metadata",
+  "gmail.insert",
+  "gmail.labels",
+  "gmail.settings.basic",
+  "gmail.settings.sharing",
   "mail.google.com",
   "drive",
   "drive.file",
   "drive.readonly",
+  "drive.appdata",
+  "drive.metadata",
+  "drive.metadata.readonly",
   "calendar",
   "calendar.readonly",
+  "calendar.events",
+  "calendar.events.readonly",
   "contacts",
   "contacts.readonly",
+  "contacts.other.readonly",
   "photoslibrary.readonly",
+  "photoslibrary",
+  "photoslibrary.appendonly",
   "youtube.upload",
+  "youtube",
+  "youtube.readonly",
+  "youtube.force-ssl",
   "documents",
+  "documents.readonly",
   "spreadsheets",
+  "spreadsheets.readonly",
+  "presentations",
+  "presentations.readonly",
   "classroom.rosters.readonly",
+  "classroom.courses.readonly",
+  "classroom.profile.emails",
   "classroom.coursework.me",
+  "classroom.coursework.me.readonly",
+  "classroom.guardianlinks.me.readonly",
   "user.phonenumbers.read",
   "user.addresses.read",
+  "user.birthday.read",
+  "user.emails.read",
   "chat.messages.readonly",
+  "chat.messages",
+  "tasks",
+  "tasks.readonly",
+  "keep",
+  "keep.readonly",
   "cloud-platform",
   "user.read",
   "user.readwrite",
@@ -250,26 +280,36 @@ const knownScopeIds = new Set([
   "mail.readbasic",
   "mail.send",
   "mailbox.readwrite",
+  "mailboxsettings.read",
+  "mailboxsettings.readwrite",
   "imap.accessasuser.all",
   "smtp.send",
+  "pop.accessasuser.all",
   "files.read",
   "files.readwrite",
+  "files.readwrite.appfolder",
   "files.read.all",
   "files.readwrite.all",
   "calendars.read",
+  "calendars.readbasic",
   "calendars.readwrite",
   "contacts.read",
   "contacts.readwrite",
+  "people.read",
   "chat.read",
   "chat.readwrite",
+  "notes.read",
+  "notes.readwrite",
+  "tasks.read",
+  "tasks.readwrite",
   "directory.read.all"
 ]);
 const jokeVoice = /lolz|yeet|hackathon|devpost|skeleton-key-lol|totally-fine/i;
 const enterpriseDump =
   /RoleManagement|Application\.ReadWrite|Policy\.ReadWrite|Sites\.FullControl|Directory\.ReadWrite|AppRoleAssignment|IdentityRisky|PrivilegedAccess/i;
 const scopes = loadScript("shared/scopes.js").SemblanceScopes;
-if (!scopes || scopes.all.length < 35) {
-  errors.push("need a denser pack: at least 35 scope translations");
+if (!scopes || scopes.all.length < 70) {
+  errors.push("need a denser consumer pack: at least 70 scope translations");
 }
 if (typeof scopes.decode !== "function" || typeof scopes.explain !== "function") {
   errors.push("scopes.js must export decode and explain");
@@ -297,7 +337,24 @@ for (const scope of scopes.all) {
     errors.push("enterprise SOC dump in scope pack: " + scope.id);
   }
 }
-for (const id of ["gmail.compose", "mail.google.com", "photoslibrary.readonly", "classroom.rosters.readonly", "imap.accessasuser.all", "mail.readbasic"]) {
+for (const id of [
+  "gmail.compose",
+  "gmail.insert",
+  "gmail.settings.basic",
+  "mail.google.com",
+  "photoslibrary.readonly",
+  "photoslibrary",
+  "classroom.rosters.readonly",
+  "classroom.profile.emails",
+  "tasks",
+  "keep",
+  "imap.accessasuser.all",
+  "mail.readbasic",
+  "mailboxsettings.read",
+  "people.read",
+  "notes.read",
+  "tasks.read"
+]) {
   if (!seenScopeIds.has(id)) {
     errors.push("denser pack missing consumer scope " + id);
   }
@@ -476,6 +533,34 @@ if (!graphMail.known || graphMail.id !== "mail.send") {
 const imapOutlook = scopes.explain("https://outlook.office.com/IMAP.AccessAsUser.All");
 if (!imapOutlook.known || imapOutlook.id !== "imap.accessasuser.all") {
   errors.push("explain(outlook IMAP) must map to imap.accessasuser.all");
+}
+const gmailInsert = scopes.explain("https://www.googleapis.com/auth/gmail.insert");
+if (!gmailInsert.known || gmailInsert.id !== "gmail.insert" || !/inbox/i.test(gmailInsert.sentence)) {
+  errors.push("explain(gmail.insert URL) must use the insert sentence, not a guess");
+}
+const photosFull = scopes.explain("https://www.googleapis.com/auth/photoslibrary");
+if (!photosFull.known || photosFull.id !== "photoslibrary") {
+  errors.push("explain(photoslibrary) must be the full library, not readonly");
+}
+const photosRo = scopes.findByRaw("photoslibrary.readonly");
+if (!photosRo || photosRo.id !== "photoslibrary.readonly") {
+  errors.push("photoslibrary.readonly must stay its own row");
+}
+const m8 = scopes.explain("https://www.google.com/m8/feeds");
+if (!m8.known || m8.id !== "contacts") {
+  errors.push("legacy contacts feed URL must map to contacts");
+}
+const notes = scopes.explain("https://graph.microsoft.com/Notes.Read");
+if (!notes.known || notes.id !== "notes.read") {
+  errors.push("explain(graph Notes.Read) must map to notes.read");
+}
+const msTasks = scopes.explain("Tasks.ReadWrite");
+if (!msTasks.known || msTasks.id !== "tasks.readwrite") {
+  errors.push("explain(Tasks.ReadWrite) must be Microsoft To Do, not Google Tasks");
+}
+const gTasks = scopes.explain("https://www.googleapis.com/auth/tasks");
+if (!gTasks.known || gTasks.id !== "tasks") {
+  errors.push("explain(Google tasks URL) must be Google Tasks");
 }
 
 const rituals = loadScript("shared/rituals.js").SemblanceRituals;

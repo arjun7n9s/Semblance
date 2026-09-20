@@ -6,7 +6,7 @@
 
 OAuth **Allow** is the login. MFA never runs on that click, on **Continue with Google / Microsoft**, or on a device-login code. The breach is the consent handoff — a trust invite, a job or club form, a pasted `code=`, a device door, or high-risk scopes on an app you have not read. One coach for that family. Not five products.
 
-Semblance sits beside the tab. When the address bar is an authorize URL, it reads `scope=` and the coach already has the plain-language map. A device-login URL gets the same pause. Paste stays as fallback. Revoke stays one tap away after you already granted something.
+Semblance sits beside the tab. When the address bar is an authorize URL, it reads `scope=` and the coach already has the plain-language map — Google and Microsoft consumer scopes from public docs, not an enterprise catalog. A device-login URL gets the same pause. Paste stays as fallback. Revoke stays one tap away after you already granted something.
 
 ## Install
 

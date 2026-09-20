@@ -69,6 +69,34 @@
       sentence: "Can see who you email and when, without opening bodies. Still a map of your life."
     },
     {
+      id: "gmail.insert",
+      raw: "gmail.insert",
+      family: "Google",
+      heat: "high",
+      sentence: "Can drop messages into this inbox so they look like they arrived. Fake mail can sit next to real mail."
+    },
+    {
+      id: "gmail.labels",
+      raw: "gmail.labels",
+      family: "Google",
+      heat: "mid",
+      sentence: "Can see and change Gmail labels. Labels are how mail gets sorted, hidden, or flagged."
+    },
+    {
+      id: "gmail.settings.basic",
+      raw: "gmail.settings.basic",
+      family: "Google",
+      heat: "high",
+      sentence: "Can change Gmail filters and settings. A filter can hide mail or send it somewhere else."
+    },
+    {
+      id: "gmail.settings.sharing",
+      raw: "gmail.settings.sharing",
+      family: "Google",
+      heat: "high",
+      sentence: "Can change who else can run this inbox, including forwarding. That is inbox control."
+    },
+    {
       id: "mail.google.com",
       raw: "https://mail.google.com/",
       family: "Google",
@@ -97,11 +125,34 @@
       sentence: "Can read every file in Drive even if it cannot change them. Homework, IDs, shared folders."
     },
     {
+      id: "drive.appdata",
+      raw: "drive.appdata",
+      family: "Google",
+      heat: "mid",
+      sentence: "Can store its own hidden app data in Drive. Not your homework folder — still on this account.",
+      aliases: ["drive.appfolder"]
+    },
+    {
+      id: "drive.metadata",
+      raw: "drive.metadata",
+      family: "Google",
+      heat: "high",
+      sentence: "Can see and change names, folders, and sharing info for Drive files — a map of what you keep."
+    },
+    {
+      id: "drive.metadata.readonly",
+      raw: "drive.metadata.readonly",
+      family: "Google",
+      heat: "mid",
+      sentence: "Can see names, folders, and sharing info for Drive files without opening them. Still a map of your files."
+    },
+    {
       id: "calendar",
       raw: "calendar",
       family: "Google",
       heat: "mid",
-      sentence: "Can see and change your calendar, including where you will be."
+      sentence: "Can see and change your calendar, including where you will be.",
+      aliases: ["https://www.google.com/calendar/feeds"]
     },
     {
       id: "calendar.readonly",
@@ -111,11 +162,26 @@
       sentence: "Can see your calendar, including where you will be. It cannot change events."
     },
     {
+      id: "calendar.events",
+      raw: "calendar.events",
+      family: "Google",
+      heat: "mid",
+      sentence: "Can see and change events on your calendars, including where you will be."
+    },
+    {
+      id: "calendar.events.readonly",
+      raw: "calendar.events.readonly",
+      family: "Google",
+      heat: "mid",
+      sentence: "Can see events on your calendars, including where you will be. It cannot change them."
+    },
+    {
       id: "contacts",
       raw: "contacts",
       family: "Google",
       heat: "high",
-      sentence: "Can read and change the people in your address book."
+      sentence: "Can read and change the people in your address book.",
+      aliases: ["https://www.google.com/m8/feeds"]
     },
     {
       id: "contacts.readonly",
@@ -125,11 +191,32 @@
       sentence: "Can read the people in your address book. It cannot change them."
     },
     {
+      id: "contacts.other.readonly",
+      raw: "contacts.other.readonly",
+      family: "Google",
+      heat: "high",
+      sentence: "Can read 'other contacts' Google saved from mail — people you emailed, not only the book you keep."
+    },
+    {
       id: "photoslibrary.readonly",
       raw: "photoslibrary.readonly",
       family: "Google",
       heat: "high",
       sentence: "Can see your Google Photos — private camera roll, screenshots, IDs you photographed."
+    },
+    {
+      id: "photoslibrary",
+      raw: "photoslibrary",
+      family: "Google",
+      heat: "high",
+      sentence: "Can see and change your Google Photos — the camera roll, plus uploads and edits."
+    },
+    {
+      id: "photoslibrary.appendonly",
+      raw: "photoslibrary.appendonly",
+      family: "Google",
+      heat: "mid",
+      sentence: "Can add items to Google Photos. It should not read the rest of the roll."
     },
     {
       id: "youtube.upload",
@@ -139,11 +226,39 @@
       sentence: "Can publish videos on your YouTube channel as you."
     },
     {
+      id: "youtube",
+      raw: "youtube",
+      family: "Google",
+      heat: "high",
+      sentence: "Can manage this YouTube channel — videos, comments, and account settings."
+    },
+    {
+      id: "youtube.readonly",
+      raw: "youtube.readonly",
+      family: "Google",
+      heat: "mid",
+      sentence: "Can see this YouTube channel, including videos and account details it should not need."
+    },
+    {
+      id: "youtube.force-ssl",
+      raw: "youtube.force-ssl",
+      family: "Google",
+      heat: "high",
+      sentence: "Can see, edit, and delete YouTube videos, comments, and captions on this channel."
+    },
+    {
       id: "documents",
       raw: "documents",
       family: "Google",
       heat: "high",
       sentence: "Can open and change Google Docs on this account, including shared school papers."
+    },
+    {
+      id: "documents.readonly",
+      raw: "documents.readonly",
+      family: "Google",
+      heat: "high",
+      sentence: "Can read Google Docs on this account, including shared school papers. It cannot change them."
     },
     {
       id: "spreadsheets",
@@ -153,6 +268,27 @@
       sentence: "Can open and change Google Sheets — homework trackers, shared lists, anything in a grid."
     },
     {
+      id: "spreadsheets.readonly",
+      raw: "spreadsheets.readonly",
+      family: "Google",
+      heat: "high",
+      sentence: "Can read Google Sheets on this account. It cannot change the grid."
+    },
+    {
+      id: "presentations",
+      raw: "presentations",
+      family: "Google",
+      heat: "high",
+      sentence: "Can open and change Google Slides — class decks and anything else in a slideshow."
+    },
+    {
+      id: "presentations.readonly",
+      raw: "presentations.readonly",
+      family: "Google",
+      heat: "high",
+      sentence: "Can read Google Slides on this account. It cannot change the deck."
+    },
+    {
       id: "classroom.rosters.readonly",
       raw: "classroom.rosters.readonly",
       family: "Google",
@@ -160,11 +296,39 @@
       sentence: "Can see who is in your classes. That is a student list, not a club-roster toy."
     },
     {
+      id: "classroom.courses.readonly",
+      raw: "classroom.courses.readonly",
+      family: "Google",
+      heat: "mid",
+      sentence: "Can see the classes you are in — names and teachers, not every assignment."
+    },
+    {
+      id: "classroom.profile.emails",
+      raw: "classroom.profile.emails",
+      family: "Google",
+      heat: "high",
+      sentence: "Can see email addresses of people in your classes. That is a class directory."
+    },
+    {
       id: "classroom.coursework.me",
       raw: "classroom.coursework.me",
       family: "Google",
       heat: "high",
       sentence: "Can read and turn in your Classroom assignments as you."
+    },
+    {
+      id: "classroom.coursework.me.readonly",
+      raw: "classroom.coursework.me.readonly",
+      family: "Google",
+      heat: "high",
+      sentence: "Can read your Classroom assignments. It cannot turn them in."
+    },
+    {
+      id: "classroom.guardianlinks.me.readonly",
+      raw: "classroom.guardianlinks.me.readonly",
+      family: "Google",
+      heat: "high",
+      sentence: "Can see the parent or guardian emails tied to this Classroom account."
     },
     {
       id: "user.phonenumbers.read",
@@ -181,11 +345,60 @@
       sentence: "Can read the home or school address saved on this account."
     },
     {
+      id: "user.birthday.read",
+      raw: "user.birthday.read",
+      family: "Google",
+      heat: "high",
+      sentence: "Can read the birthday saved on this Google account."
+    },
+    {
+      id: "user.emails.read",
+      raw: "user.emails.read",
+      family: "Google",
+      heat: "high",
+      sentence: "Can read extra email addresses saved on this Google account, not only the main one."
+    },
+    {
       id: "chat.messages.readonly",
       raw: "chat.messages.readonly",
       family: "Google",
       heat: "high",
       sentence: "Can read your Google Chat messages, including DMs."
+    },
+    {
+      id: "chat.messages",
+      raw: "chat.messages",
+      family: "Google",
+      heat: "high",
+      sentence: "Can read and send Google Chat messages as you, including DMs."
+    },
+    {
+      id: "tasks",
+      raw: "tasks",
+      family: "Google",
+      heat: "mid",
+      sentence: "Can see and change Google Tasks on this account — to-dos, due dates, lists."
+    },
+    {
+      id: "tasks.readonly",
+      raw: "tasks.readonly",
+      family: "Google",
+      heat: "mid",
+      sentence: "Can see Google Tasks on this account. It cannot change the lists."
+    },
+    {
+      id: "keep",
+      raw: "keep",
+      family: "Google",
+      heat: "high",
+      sentence: "Can see and change Google Keep notes — the private pad, not a public doc."
+    },
+    {
+      id: "keep.readonly",
+      raw: "keep.readonly",
+      family: "Google",
+      heat: "high",
+      sentence: "Can read Google Keep notes on this account. It cannot change them."
     },
     {
       id: "cloud-platform",
@@ -237,6 +450,20 @@
       sentence: "Can read and change your mail, including deleting the evidence."
     },
     {
+      id: "mailboxsettings.read",
+      raw: "MailboxSettings.Read",
+      family: "Microsoft",
+      heat: "high",
+      sentence: "Can read Outlook mailbox settings, including automatic replies and some forwarding clues."
+    },
+    {
+      id: "mailboxsettings.readwrite",
+      raw: "MailboxSettings.ReadWrite",
+      family: "Microsoft",
+      heat: "high",
+      sentence: "Can change Outlook mailbox settings, including automatic replies and forwarding."
+    },
+    {
       id: "imap.accessasuser.all",
       raw: "IMAP.AccessAsUser.All",
       family: "Microsoft",
@@ -251,6 +478,13 @@
       sentence: "Can send email as you through Outlook's send server."
     },
     {
+      id: "pop.accessasuser.all",
+      raw: "POP.AccessAsUser.All",
+      family: "Microsoft",
+      heat: "high",
+      sentence: "Lets another app sit on your mailbox through POP — download mail as you."
+    },
+    {
       id: "files.read",
       raw: "Files.Read",
       family: "Microsoft",
@@ -263,6 +497,13 @@
       family: "Microsoft",
       heat: "high",
       sentence: "Can change files in your OneDrive."
+    },
+    {
+      id: "files.readwrite.appfolder",
+      raw: "Files.ReadWrite.AppFolder",
+      family: "Microsoft",
+      heat: "mid",
+      sentence: "Can only change files in this app's own OneDrive folder. Not the rest of your drive."
     },
     {
       id: "files.read.all",
@@ -286,6 +527,13 @@
       sentence: "Can see Outlook calendar events, including where you will be."
     },
     {
+      id: "calendars.readbasic",
+      raw: "Calendars.ReadBasic",
+      family: "Microsoft",
+      heat: "mid",
+      sentence: "Can see Outlook calendar times and titles. Even without bodies, that is still where you will be."
+    },
+    {
       id: "calendars.readwrite",
       raw: "Calendars.ReadWrite",
       family: "Microsoft",
@@ -307,6 +555,13 @@
       sentence: "Can read and change the people in your Outlook address book."
     },
     {
+      id: "people.read",
+      raw: "People.Read",
+      family: "Microsoft",
+      heat: "high",
+      sentence: "Can see people Microsoft thinks you work with — a relevance list, not a random directory dump."
+    },
+    {
       id: "chat.read",
       raw: "Chat.Read",
       family: "Microsoft",
@@ -319,6 +574,34 @@
       family: "Microsoft",
       heat: "high",
       sentence: "Can read and send Teams or Microsoft chat as you."
+    },
+    {
+      id: "notes.read",
+      raw: "Notes.Read",
+      family: "Microsoft",
+      heat: "high",
+      sentence: "Can read OneNote notebooks on this account."
+    },
+    {
+      id: "notes.readwrite",
+      raw: "Notes.ReadWrite",
+      family: "Microsoft",
+      heat: "high",
+      sentence: "Can read and change OneNote notebooks on this account."
+    },
+    {
+      id: "tasks.read",
+      raw: "Tasks.Read",
+      family: "Microsoft",
+      heat: "mid",
+      sentence: "Can see Microsoft To Do tasks on this account."
+    },
+    {
+      id: "tasks.readwrite",
+      raw: "Tasks.ReadWrite",
+      family: "Microsoft",
+      heat: "mid",
+      sentence: "Can see and change Microsoft To Do tasks on this account."
     },
     {
       id: "directory.read.all",
