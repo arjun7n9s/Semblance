@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Semblance privacy policy</title>
+  <meta name="description" content="Semblance is local-first. It reads tab URLs only to detect OAuth authorize and device-login patterns. It does not block phishing, monitor accounts, or inject into a live identity provider.">
+  <link rel="canonical" href="https://arjun7n9s.github.io/Semblance/privacy/">
+  <style>
+    :root {
+      --ink: #161310;
+      --paper: #f3ebdc;
+      --paper-2: #fff8ec;
+      --line: #1b1612;
+      --mute: #5c5247;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+    }
+    body {
+      font: 16px/1.5 "Segoe UI", "Helvetica Neue", sans-serif;
+    }
+    a { color: var(--ink); }
+    header, main, footer {
+      max-width: 40rem;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
+    header {
+      padding-top: 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      text-decoration: none;
+    }
+    .brand svg { flex: none; }
+    .brand-name {
+      font-size: 1.65rem;
+      font-weight: 650;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .tag {
+      margin: 0.65rem 0 0;
+      color: var(--mute);
+      letter-spacing: 0.04em;
+    }
+    h1 {
+      margin: 1.1rem 0 0.35rem;
+      font-size: 1.35rem;
+      font-weight: 650;
+    }
+    .updated, .source {
+      margin: 0 0 0.5rem;
+      color: var(--mute);
+      font-size: 0.92rem;
+    }
+    h2 {
+      margin: 1.75rem 0 0.6rem;
+      font-size: 1.05rem;
+      letter-spacing: 0.04em;
+    }
+    p, li { color: var(--ink); }
+    .lede { font-size: 1.02rem; }
+    ul { padding-left: 1.2rem; }
+    li { margin: 0.35rem 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      background: var(--paper-2);
+    }
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      padding: 0.55rem 0.65rem;
+      border: 1px solid rgba(22, 19, 16, 0.22);
+    }
+    th { font-weight: 650; }
+    code {
+      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      font-size: 0.88em;
+    }
+    footer {
+      padding: 1.5rem 1.25rem 2.5rem;
+      color: var(--mute);
+      font-size: 0.92rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="https://github.com/arjun7n9s/Semblance">
+      <svg width="36" height="36" viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="2.5" y="2.5" width="27" height="27" rx="7" fill="none" stroke="currentColor" stroke-width="1.75"/>
+        <rect x="10" y="9" width="3.4" height="14" rx="1"/>
+        <rect x="18.6" y="9" width="3.4" height="14" rx="1"/>
+      </svg>
+      <span class="brand-name">Semblance</span>
+    </a>
+    <p class="tag">Pause at Allow.</p>
+    <h1>Privacy policy</h1>
+    <p class="updated">Last updated: 20 September 2026</p>
+    <p class="source">Source of truth: <a href="https://github.com/arjun7n9s/Semblance/blob/main/PRIVACY.md">PRIVACY.md</a> in the Semblance repo. This page is the public HTML copy for Chrome Web Store. There is no separate Semblance privacy website and no Semblance account.</p>
+  </header>
+  <main>
+    <p class="lede">Semblance is a local Chrome extension that <strong>detects</strong> OAuth authorize and device-login URLs, <strong>decodes</strong> <code>scope=</code> tokens into plain language, <strong>coaches</strong> the consent click, and keeps a <strong>revoke door</strong>. It does not block phishing, monitor accounts, freeze a live Allow screen, or inject into an identity provider.</p>
+
+    <h2>Local-first. No account. No Semblance servers.</h2>
+    <p>Semblance does not create an account. It does not require sign-in. It does not send telemetry, analytics, crash reports, or browsing data to Semblance — there are no Semblance servers on the path.</p>
+    <p>Nothing in the extension calls home. Decode, detect, friend-verify, paste checks, and the optional revoke reminder all run in this browser.</p>
+    <p>When you click an official revoke button, Chrome opens Google’s or Microsoft’s connected-apps page in a tab. That visit is yours with them, not a Semblance upload.</p>
+
+    <h2>What <code>tabs</code> and <code>webNavigation</code> see</h2>
+    <p>Semblance requests <code>tabs</code> and <code>webNavigation</code> so it can read a tab’s <strong>URL</strong> (the address bar), not the page. URL only.</p>
+    <p>It looks for:</p>
+    <ul>
+      <li>OAuth <strong>authorize</strong> patterns — paths such as <code>/authorize</code> with <code>scope=</code>, or common Google/Microsoft authorize paths</li>
+      <li><strong>Device-login</strong> patterns — <code>/devicelogin</code>, <code>google.com/device</code>, <code>g.co/device</code>, <code>aka.ms/devicelogin</code>, and similar device doors</li>
+    </ul>
+    <p>Rules:</p>
+    <ul>
+      <li>Main frame only. Iframes are ignored (<code>frameId === 0</code>).</li>
+      <li>URL only. Semblance does not read the DOM, cookies, form fields, or page text.</li>
+      <li>URLs that already carry secrets (<code>code=</code>, <code>access_token=</code>, <code>id_token=</code>, <code>refresh_token=</code>) are <strong>not</strong> stored as live Allows.</li>
+      <li>A matching URL is decoded locally (known scopes → one sentence; unknown stays unknown). A short snapshot is kept in <code>chrome.storage.session</code> for that tab, a toolbar badge may show, and an optional notification may fire.</li>
+      <li>The snapshot is dropped when the tab closes or you leave that host.</li>
+      <li><code>tabs.query</code> on startup only restores badges for tabs that still match.</li>
+    </ul>
+    <p>This is detect → decode → badge. It is not an account scan, not web history uploaded anywhere, and not a content script on <code>accounts.google.com</code>, Microsoft login, or any live identity provider.</p>
+
+    <h2>What this browser stores</h2>
+    <h3><code>chrome.storage.session</code> (cleared when Chrome stops)</h3>
+    <table>
+      <thead>
+        <tr><th>Key</th><th>Contents</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>liveAllows</code></td>
+          <td>Per-tab snapshots: tab id, host, authorize vs device-login, decoded scope tokens and sentences (or a device-login nudge), timestamps, whether a notice already fired. No page HTML. No <code>code=</code>. No cookies.</td>
+        </tr>
+        <tr>
+          <td><code>friendOk</code></td>
+          <td>Whether friend-verify succeeded in this browser session.</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3><code>chrome.storage.local</code> (this profile, until you remove the extension)</h3>
+    <table>
+      <thead>
+        <tr><th>Key</th><th>Contents</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>friendWord</code></td>
+          <td>The shared word you saved for friend-verify. Local only. Never transmitted.</td>
+        </tr>
+        <tr>
+          <td><code>friendOkAt</code>, <code>understoodAt</code></td>
+          <td>Timestamps for “verified” / “I understand”.</td>
+        </tr>
+        <tr>
+          <td><code>reasonLog</code></td>
+          <td>Metadata only: time, level, reason. Cap of 40. No page text. No tokens.</td>
+        </tr>
+        <tr>
+          <td><code>interruptKeys</code></td>
+          <td>Which labeled-demo pause steps already ran, so the FAKE Allow does not nag forever.</td>
+        </tr>
+        <tr>
+          <td><code>demoBeat</code></td>
+          <td>Bookmark for the optional labeled walkthrough (<code>idle</code> / lure / allow). The coach does not need it.</td>
+        </tr>
+        <tr>
+          <td><code>revokeRemind</code></td>
+          <td>Optional check-in you scheduled: on/off, delay choice, fire time, canceled/fired flags. Not an account snapshot.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Paste ritual input is checked with local regex and <strong>is not stored</strong>.</p>
+    <p>Semblance does not use <code>chrome.storage.sync</code>.</p>
+
+    <h2>Notifications and alarms</h2>
+    <p><code>notifications</code> and <code>alarms</code> stay on-device.</p>
+    <ul>
+      <li>A detect notice may say this tab is asking for Allow, or is a device-login door, and to open the coach. It does not include page content or tokens.</li>
+      <li>A revoke check-in notice fires only if you scheduled that reminder. Copy says it is not live monitoring. Semblance still cannot see your connected apps.</li>
+    </ul>
+    <p>Alarms are one-shot timers you set. Default off. They do not poll Google or Microsoft. Reminder only — not monitoring.</p>
+
+    <h2>What Semblance does not do</h2>
+    <ul>
+      <li>No content scripts on live identity providers (Google, Microsoft, or anyone else’s login host). The only content script, if it runs at all, attaches to Semblance’s own labeled demo pages (<code>demo/lure.html</code>, <code>demo/allow.html</code>), including <code>file://</code> copies.</li>
+      <li>No reading or exchanging authorization codes, cookies, or access tokens.</li>
+      <li>No injecting, clicking, blocking, or rewriting Allow.</li>
+      <li>No account scanning and no grant inventory. Semblance does not monitor accounts.</li>
+      <li>No Discord bot, parent ping, or cloud on the critical path.</li>
+      <li>No URL phishing score or link reputation. Semblance does not block phishing.</li>
+      <li>No sale of data. No third parties. No advertising SDK.</li>
+    </ul>
+
+    <h2>Children</h2>
+    <p>Semblance is a literacy coach, not a child-directed service. It does not knowingly collect data from children. Friend-verify words stay in this browser.</p>
+
+    <h2>Changes</h2>
+    <p>Updates to this policy are committed to <a href="https://github.com/arjun7n9s/Semblance/blob/main/PRIVACY.md">PRIVACY.md</a>. The “Last updated” date is the version marker. Keep this hosted copy in sync with the repo before each store submit.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about this policy: <a href="mailto:arjun7n9s@gmail.com">arjun7n9s@gmail.com</a> · source <a href="https://github.com/arjun7n9s/Semblance">github.com/arjun7n9s/Semblance</a></p>
+  </main>
+  <footer>
+    <p>Preferred URL: <a href="https://arjun7n9s.github.io/Semblance/privacy/">https://arjun7n9s.github.io/Semblance/privacy/</a>. Interim markdown: <a href="https://raw.githubusercontent.com/arjun7n9s/Semblance/main/PRIVACY.md">raw PRIVACY.md</a>.</p>
+  </footer>
+</body>
+</html>

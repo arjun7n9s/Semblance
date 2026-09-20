@@ -87,10 +87,13 @@ node scripts/pack-store.mjs
 
 Writes `dist/semblance-store.zip` — manifest, background, shared, popup, side panel, content, icons, and the labeled demo pages. Leaves out `docs/`, scripts, markdown, `.git`, and soak folders. The zip does not inject into a live identity provider.
 
-- Listing draft (short + detailed copy, category, permissions, single purpose): [STORE.md](STORE.md)
-- Privacy policy to host: [PRIVACY.md](PRIVACY.md)
+- Listing draft (short + detailed copy, category, permissions, single purpose, screenshot upload order): [STORE.md](STORE.md)
+- Privacy policy source: [PRIVACY.md](PRIVACY.md)
+- Store screenshots (1280×800, upload order in STORE.md): [`docs/store/`](docs/store/)
+- **Preferred** public privacy URL: https://arjun7n9s.github.io/Semblance/privacy/
+- **Interim:** https://raw.githubusercontent.com/arjun7n9s/Semblance/main/PRIVACY.md
 
-Chrome Web Store needs a **public HTTPS URL** for the privacy policy. `PRIVACY.md` in this repo is the source. Publish it (GitHub Pages or a raw GitHub URL) before you submit. There is no separate Semblance privacy host.
+Chrome Web Store needs a **public HTTPS URL** for the privacy policy. `PRIVACY.md` is the source; `docs/privacy/index.html` is the public HTML copy. Enable GitHub Pages from **main** / **docs** (Settings → Pages → Deploy from a branch) if the preferred URL 404s. There is no separate Semblance privacy host.
 
 ## What we refuse
 

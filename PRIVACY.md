@@ -2,7 +2,7 @@
 
 Last updated: 20 September 2026
 
-This policy is the source of truth for Chrome Web Store privacy fields. Host this file at a **public HTTPS URL** (GitHub Pages or a raw GitHub URL) before you submit the listing. There is no separate Semblance privacy website.
+This policy is the source of truth for Chrome Web Store privacy fields. Host it at a **public HTTPS URL** before you submit the listing. Preferred: [https://arjun7n9s.github.io/Semblance/privacy/](https://arjun7n9s.github.io/Semblance/privacy/) (GitHub Pages from `main` `/docs`, serving `docs/privacy/index.html`). Interim: [https://raw.githubusercontent.com/arjun7n9s/Semblance/main/PRIVACY.md](https://raw.githubusercontent.com/arjun7n9s/Semblance/main/PRIVACY.md). There is no separate Semblance privacy website.
 
 Semblance is a local Chrome extension that **detects** OAuth authorize and device-login URLs, **decodes** `scope=` tokens into plain language, **coaches** the consent click, and keeps a **revoke door**. It does not block phishing, monitor accounts, freeze a live Allow screen, or inject into an identity provider.
 
