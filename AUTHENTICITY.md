@@ -28,6 +28,7 @@ Leave the panel open beside the tab that is asking. That is why it is a side pan
 
 - The Allow click is the breach. MFA never runs on it. Theater pauses a fake Allow. Real Allow screens stay untouched.
 - Address-bar `scope=` is not token capture. `code=`, cookies, and access tokens are refused.
+- Live-detect demos and screenshots use real authorize URL shapes (`accounts.google.com/o/oauth2/v2/auth?…`, `login.microsoftonline.com/…/authorize?…`, `google.com/device`). Dummy `client_id` is fine; do not use `example.com` in the omnibox. Theater Allow stays on `chrome-extension://…/demo/allow.html` with the FAKE banner — never a live IdP inject.
 - If the gate is already open from the side panel, Beat B Allow does not pause again. You already owned the click. To show the once-only ladder, leave the gate closed.
 - LabQueue is a prop. If the FAKE banner is not visible, stop — do not present.
 - Reason log is metadata (time, level, reason). No page text. No tokens.
