@@ -37,6 +37,90 @@
     list.appendChild(li);
   }
 
+  function renderLive(hit) {
+    var box = $("live-hit");
+    var kicker = $("live-kicker");
+    var lead = $("live-lead");
+    var list = $("live-list");
+    var status = $("live-status");
+    var cue;
+    if (!box || !list || !status) {
+      return;
+    }
+    list.innerHTML = "";
+    if (!hit) {
+      box.hidden = true;
+      status.textContent = "";
+      return;
+    }
+    cue = SemblanceWatch && SemblanceWatch.cueFor ? SemblanceWatch.cueFor(hit.kind) : null;
+    box.hidden = false;
+    if (hit.kind === "device") {
+      kicker.textContent = "This tab is a device-login door";
+      lead.textContent = cue ? cue.panelLead : SemblanceWatch.COPY.panelLeadDevice;
+      if (hit.nudge) {
+        appendScopeRow(list, {
+          family: hit.family || "Either",
+          heat: "high",
+          raw: hit.nudge.title,
+          sentence: hit.nudge.sentence
+        });
+      }
+      status.textContent =
+        "Address bar only. If a chat sent a code, check it in Paste ritual below. " +
+        SemblanceWatch.COPY.notAScore;
+      return;
+    }
+    kicker.textContent = "This tab is asking for Allow";
+    lead.textContent = cue ? cue.panelLead : SemblanceWatch.COPY.panelLead;
+    (hit.items || []).forEach(function (scope) {
+      appendScopeRow(list, scope, scope.token);
+    });
+    status.textContent =
+      (hit.items && hit.items.length ? hit.items.length : 0) +
+      (hit.items && hit.items.length === 1 ? " scope from this tab. " : " scopes from this tab. ") +
+      (hit.unknown ? hit.unknown + " unknown. " : "None unknown. ") +
+      "Nothing from the page. " +
+      SemblanceWatch.COPY.notAScore;
+  }
+
+  function queryActiveTab() {
+    return new Promise(function (resolve) {
+      if (typeof chrome === "undefined" || !chrome.tabs || typeof chrome.tabs.query !== "function") {
+        resolve(null);
+        return;
+      }
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        resolve((tabs && tabs[0]) || null);
+      });
+    });
+  }
+
+  function refreshLive() {
+    if (typeof SemblanceWatch === "undefined" || !SemblanceWatch.readTab) {
+      return;
+    }
+    queryActiveTab().then(function (tab) {
+      if (!tab || tab.id == null) {
+        renderLive(null);
+        return;
+      }
+      SemblanceWatch.readTab(tab.id).then(function (hit) {
+        if (hit) {
+          renderLive(hit);
+          return;
+        }
+        if (tab.url) {
+          SemblanceWatch.onUrl(tab.id, tab.url, { notify: false }).then(function (saved) {
+            renderLive(saved || null);
+          });
+          return;
+        }
+        renderLive(null);
+      });
+    });
+  }
+
   function renderScopes(query) {
     var list = $("scope-list");
     var rows = SemblanceScopes.filter(query);
@@ -308,6 +392,7 @@
     chrome.storage.onChanged.addListener(function (_changes, area) {
       if (area === "local" || area === "session") {
         refreshGate();
+        refreshLive();
         if (area === "local") {
           refreshRemind();
         }
@@ -315,7 +400,14 @@
     });
   }
 
+  if (typeof chrome !== "undefined" && chrome.tabs && chrome.tabs.onActivated) {
+    chrome.tabs.onActivated.addListener(function () {
+      refreshLive();
+    });
+  }
+
   renderScopes("");
   refreshGate();
   refreshRemind();
+  refreshLive();
 })();

@@ -11,8 +11,9 @@
       <p class="eyebrow">Semblance · beside the tab</p>
       <h1>Allow is the login.</h1>
       <p class="lede" id="lede">
-        A chat can hand you a consent screen. MFA never runs on Allow. Leave this
-        panel open. You do not need the demo pages.
+        MFA never runs on Allow. The same click shows up as a trust invite, a
+        job-form Continue, a pasted code, a device login, or a high-risk scope
+        list. Leave this panel open. You do not need the demo pages.
       </p>
     </header>
 
@@ -24,22 +25,30 @@
       </p>
     </section>
 
+    <section class="panel now live" id="live-hit" hidden>
+      <p class="kicker" id="live-kicker">This tab is asking for Allow</p>
+      <p id="live-lead"></p>
+      <ol id="live-list"></ol>
+      <p class="status" id="live-status" role="status" aria-live="polite"></p>
+    </section>
+
     <section class="panel now">
       <h2>Use this now</h2>
       <p>
-        Someone asked you to click Allow, paste a code, or keep an app you already
-        granted. Paste the Allow URL and read the scopes. Verify a person in the
-        room — or own the click. Check a paste ritual before you open it. Revoke if
-        you already allowed. Nothing here talks to Google or Microsoft login. Real
-        Allow screens stay untouched.
+        Consent is the breach — not the chat app around it. Read the scopes on this
+        tab, or paste an Allow URL. Check a <code>code=</code> or localhost paste.
+        A device-login URL gets the same pause. Verify a person in the room, or own
+        the click. Revoke if you already allowed. Nothing here talks to a live login
+        host. Real Allow screens stay untouched.
       </p>
     </section>
 
     <section class="panel">
       <h2>Scope coach</h2>
       <p>
-        Paste an Allow URL or a <code>scope=</code> query. Semblance translates those
-        scopes — the same map as the click. It does not score the link.
+        If this tab is an authorize URL, the map above is already decoded. Paste
+        remains the fallback. Semblance translates <code>scope=</code> tokens — it
+        does not score the link.
       </p>
       <label for="scope-decode-input">Authorize URL or scope= query</label>
       <textarea
@@ -90,7 +99,10 @@
     <section class="panel">
       <h2>Paste ritual</h2>
       <p>
-        Paste a URL or a chat line. Semblance only checks local regex rules. The paste is not stored.
+        Paste a URL or a chat line — localhost redirects, <code>code=</code> handoff,
+        a device code. Semblance only checks local regex rules. The paste is not stored.
+        Live device-login tabs are nudged from the address bar; paste is how you check
+        a code someone sent you.
       </p>
       <label for="ritual-input">URL or message</label>
       <textarea id="ritual-input" rows="4" placeholder="http://localhost:4173/callback?code=…"></textarea>
@@ -138,13 +150,14 @@
     </section>
 
     <p class="foot">
-      Labeled FAKE walkthrough lives in the toolbar popup. You do not need it to use this coach.
+      Demo only (labeled FAKE) lives behind that label in the toolbar popup. You do not need it to use this coach.
     </p>
 
     <script src="../shared/scopes.js"></script>
     <script src="../shared/rituals.js"></script>
     <script src="../shared/storage.js"></script>
     <script src="../shared/remind.js"></script>
+    <script src="../shared/watch.js"></script>
     <script src="sidepanel.js"></script>
   </body>
 </html>
