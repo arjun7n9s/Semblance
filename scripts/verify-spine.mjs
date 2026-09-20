@@ -384,7 +384,7 @@ function expectDecode(sample, check, label) {
 }
 
 expectDecode(
-  "https://example.test/authorize?client_id=demo&response_type=code&scope=openid%20email%20https://www.googleapis.com/auth/gmail.readonly%20https://www.googleapis.com/auth/drive.file%20https://www.googleapis.com/auth/not.a.real.scope&access_type=offline",
+  "https://accounts.google.com/o/oauth2/v2/auth?client_id=000000000000-demo.apps.googleusercontent.com&response_type=code&scope=openid%20email%20https://www.googleapis.com/auth/gmail.readonly%20https://www.googleapis.com/auth/drive.file%20https://www.googleapis.com/auth/not.a.real.scope&access_type=offline&redirect_uri=http%3A%2F%2F127.0.0.1%3A4173%2Fcallback",
   (result) => {
     if (!result.ok) {
       return "expected ok, got " + result.reason;
@@ -417,7 +417,7 @@ expectDecode(
 );
 
 expectDecode(
-  "https://example.test/oauth2/v2.0/authorize?scope=User.Read+Mail.Send+offline_access",
+  "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?scope=User.Read+Mail.Send+offline_access",
   (result) => {
     if (!result.ok) {
       return "expected ok";
@@ -435,7 +435,7 @@ expectDecode(
 );
 
 expectDecode(
-  "Maya sent this:\nhttps://example.test/authorize?redirect_uri=https%3A%2F%2Fapp.example%2Fcb&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive%20https%3A%2F%2Fgraph.microsoft.com%2FMail.Read&amp;state=1\nthx",
+  "Maya sent this:\nhttps://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http%3A%2F%2F127.0.0.1%3A4173%2Fcb&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive%20https%3A%2F%2Fgraph.microsoft.com%2FMail.Read&amp;state=1\nthx",
   (result) => {
     if (!result.ok) {
       return "expected ok from chat wrap, got " + result.reason;
@@ -476,7 +476,7 @@ expectDecode(
   "bare scope list"
 );
 
-expectDecode("https://example.com/help?topic=code", (result) => {
+expectDecode("https://support.google.com/accounts?hl=en", (result) => {
   if (result.ok || result.reason !== "no-scope") {
     return "URL without scope= must not invent scopes";
   }
@@ -497,7 +497,7 @@ expectDecode("", (result) => {
   return null;
 }, "empty");
 
-expectDecode("https://example.test/authorize?scope=&client_id=x", (result) => {
+expectDecode("https://accounts.google.com/o/oauth2/v2/auth?scope=&client_id=x", (result) => {
   if (result.ok || result.reason !== "empty-scope") {
     return "empty scope=";
   }
@@ -505,7 +505,7 @@ expectDecode("https://example.test/authorize?scope=&client_id=x", (result) => {
 }, "empty scope=");
 
 expectDecode(
-  "https://example.test/cb#scope=email%20profile&token_type=Bearer",
+  "https://accounts.google.com/o/oauth2/v2/auth#scope=email%20profile&token_type=Bearer",
   (result) => {
     if (!result.ok) {
       return "hash scope should decode";
@@ -576,9 +576,9 @@ const ritualCases = [
   ["open localhost:8080/callback now", "localhost-url"],
   ["http://127.0.0.1:53682/authorize?code=4%2F0Aean5NotARealCodeAtAll0001", "localhost-url"],
   ["http://127.0.0.1:53682/authorize?code=4%2F0Aean5NotARealCodeAtAll0001", "auth-code"],
-  ["https://example.test/cb?redirect_uri=http%3A%2F%2Flocalhost%3A3000", "redirect-localhost"],
+  ["https://authorize.semblance.local/cb?redirect_uri=http%3A%2F%2Flocalhost%3A3000", "redirect-localhost"],
   ['{"redirect_uri":"http://127.0.0.1:4173/callback"}', "redirect-localhost"],
-  ["https://app.test/oauth?code=SplendidCode", "auth-code"],
+  ["https://authorize.semblance.local/oauth?code=SplendidCode", "auth-code"],
   ["paste this 4/0Aean5NotARealCodeAtAll0001 into the box", "google-auth-code"],
   ["Enter code ABCD-EFGH on the device page", "device-code"],
   ["open microsoft.com/devicelogin", "device-login-host"],
@@ -605,7 +605,7 @@ const ritualNegatives = [
   "",
   "   ",
   "hello from the class group",
-  "https://example.com/help?topic=code",
+  "https://support.google.com/accounts?hl=en",
   "see you at 4/20",
   "click Allow on the club form"
 ];
@@ -859,10 +859,10 @@ if (!/not watching accounts/.test(read("SMOKE.md")) && !/not watching your accou
 if (!/1 minute/.test(read("SMOKE.md")) || !/Turn off/.test(read("SMOKE.md")) || !/not live monitoring/.test(read("SMOKE.md"))) {
   errors.push("SMOKE.md must schedule, cancel, and fire a reminder without claiming monitoring");
 }
-if (!/example\.com\/authorize/.test(read("SMOKE.md")) || !/Do \*\*not\*\* paste/.test(read("SMOKE.md"))) {
-  errors.push("SMOKE.md must fire the live badge from a sample authorize URL without paste");
+if (!/accounts\.google\.com\/o\/oauth2\/v2\/auth/.test(read("SMOKE.md")) || !/Do \*\*not\*\* paste/.test(read("SMOKE.md"))) {
+  errors.push("SMOKE.md must fire the live badge from a realistic authorize URL without paste");
 }
-if (!/example\.com\/devicelogin/.test(read("SMOKE.md"))) {
+if (!/google\.com\/device/.test(read("SMOKE.md"))) {
   errors.push("SMOKE.md must include a device-login URL nudge");
 }
 if (!/Demo only \(labeled FAKE\)/.test(read("SMOKE.md")) || !/Demo only \(labeled FAKE\)/.test(read("README.md"))) {
@@ -1024,8 +1024,18 @@ if (!/host_permissions/.test(packSrc) || !/file:/.test(packSrc)) {
 
 const forbiddenVoice = /TLN|Tech Literacy Network|Devpost|hackathon|contest|competition/i;
 const liveIdpHref = /https?:\/\/(accounts\.google\.com|login\.microsoftonline\.com|login\.live\.com)/i;
-const revokeAllow = new Set(["sidepanel/sidepanel.js", "README.md", "shared/remind.js"]);
+// Live IdP hrefs are OK in revoke deep-links and in docs that tell humans to *navigate*
+// (address-bar detect). Still forbidden in theater HTML/JS so we never look like IdP inject.
+const liveIdpAllow = new Set([
+  "sidepanel/sidepanel.js",
+  "sidepanel/sidepanel.html",
+  "README.md",
+  "SMOKE.md",
+  "AUTHENTICITY.md",
+  "shared/remind.js"
+]);
 const monitoringClaim = /Semblance monitors|Semblance is watching your|parent dashboard|background surveillance|we scan your accounts/i;
+const toyHostHref = /https?:\/\/([^\s"'`)]*\.)?example\.(com|org|net|test)\b/i;
 
 for (const rel of walkFiles(root)) {
   if (rel === "scripts/verify-spine.mjs") {
@@ -1035,8 +1045,11 @@ for (const rel of walkFiles(root)) {
   if (forbiddenVoice.test(text)) {
     errors.push("forbidden framing in " + rel);
   }
-  if (liveIdpHref.test(text) && !revokeAllow.has(rel)) {
+  if (liveIdpHref.test(text) && !liveIdpAllow.has(rel)) {
     errors.push("live IdP URL in " + rel);
+  }
+  if (toyHostHref.test(text)) {
+    errors.push("toy/example host in " + rel + " — use real authorize URL shapes or chrome-extension:// theater");
   }
   if (monitoringClaim.test(text)) {
     errors.push("monitoring claim in " + rel);
@@ -1103,7 +1116,7 @@ async function checkEmptyStorageAndWrongWord() {
     errors.push("scope coach must work with empty storage");
   }
   const decoded = ctx.SemblanceScopes.decode(
-    "https://example.test/authorize?scope=Mail.Send+https://www.googleapis.com/auth/gmail.readonly"
+    "https://accounts.google.com/o/oauth2/v2/auth?scope=Mail.Send+https://www.googleapis.com/auth/gmail.readonly"
   );
   if (!decoded.ok || decoded.unknown !== 0 || decoded.items.length !== 2) {
     errors.push("scope decode must work with empty storage");
@@ -1266,7 +1279,7 @@ function watchChrome() {
   mem.navListeners = [];
   mem.tabUpdated = [];
   mem.tabRemoved = [];
-  mem.openTabs = [{ id: 7, url: "https://example.com/", windowId: 1 }];
+  mem.openTabs = [{ id: 7, url: "https://accounts.google.com/", windowId: 1 }];
   mem.chrome.action.setBadgeText = function (info) {
     if (info && info.tabId != null) {
       mem.badgeByTab[info.tabId] = info.text || "";
@@ -1329,7 +1342,7 @@ async function checkWatch() {
   }
 
   expectSnap(
-    "https://example.com/authorize?response_type=code&scope=openid%20email%20https://www.googleapis.com/auth/gmail.readonly%20https://www.googleapis.com/auth/drive.file%20https://www.googleapis.com/auth/not.a.real.scope",
+    "https://authorize.semblance.local/authorize?response_type=code&scope=openid%20email%20https://www.googleapis.com/auth/gmail.readonly%20https://www.googleapis.com/auth/drive.file%20https://www.googleapis.com/auth/not.a.real.scope",
     (snap) => {
       if (!snap.ok || snap.kind !== "authorize") {
         return "expected authorize, got " + JSON.stringify(snap);
@@ -1338,7 +1351,7 @@ async function checkWatch() {
       if (ids.join() !== "openid,email,gmail.readonly,drive.file,unknown") {
         return "ids " + ids.join();
       }
-      if (snap.host !== "example.com") {
+      if (snap.host !== "authorize.semblance.local") {
         return "host";
       }
       if ("url" in snap || /code=/.test(JSON.stringify(snap))) {
@@ -1350,7 +1363,7 @@ async function checkWatch() {
   );
 
   expectSnap(
-    "https://example.test/oauth2/v2.0/authorize?scope=User.Read+Mail.Send+offline_access",
+    "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?scope=User.Read+Mail.Send+offline_access",
     (snap) => {
       if (!snap.ok || snap.kind !== "authorize") {
         return "expected microsoft-style authorize";
@@ -1377,9 +1390,9 @@ async function checkWatch() {
     "google oauth2 auth path"
   );
 
-  expectSnap("https://example.com/devicelogin", (snap) => {
+  expectSnap("https://authorize.semblance.local/devicelogin", (snap) => {
     if (!snap.ok || snap.kind !== "device") {
-      return "example.com/devicelogin should nudge";
+      return "generic /devicelogin should nudge";
     }
     if (!snap.nudge || !/device-login/i.test(snap.nudge.sentence) || !/Allow/.test(snap.nudge.sentence)) {
       return "device nudge sentence";
@@ -1428,21 +1441,21 @@ async function checkWatch() {
     return null;
   }, "device URL must not capture user_code");
 
-  expectSnap("https://example.com/help?topic=code", (snap) => {
+  expectSnap("https://support.google.com/accounts?hl=en", (snap) => {
     if (snap.ok) {
       return "help page must not look like Allow";
     }
     return null;
   }, "no-scope help URL");
 
-  expectSnap("https://example.com/help?scope=openid", (snap) => {
+  expectSnap("https://support.google.com/accounts?scope=openid", (snap) => {
     if (snap.ok) {
       return "scope= without authorize path must not fire";
     }
     return null;
   }, "scope= on a help page");
 
-  expectSnap("https://example.com/callback?code=4/0Aean5NotARealCodeAtAll0001&scope=email", (snap) => {
+  expectSnap("https://accounts.google.com/o/oauth2/v2/auth?code=4/0Aean5NotARealCodeAtAll0001&scope=email", (snap) => {
     if (snap.ok) {
       return "code= callback is paste-ritual, not live capture";
     }
@@ -1466,7 +1479,7 @@ async function checkWatch() {
   const iframe = await live.onNavDetails({
     tabId: 7,
     frameId: 3,
-    url: "https://example.com/authorize?scope=email"
+    url: "https://authorize.semblance.local/authorize?scope=email"
   });
   if (iframe) {
     errors.push("iframes must not set a live Allow");
@@ -1478,7 +1491,7 @@ async function checkWatch() {
   const hit = await live.onNavDetails({
     tabId: 7,
     frameId: 0,
-    url: "https://example.com/authorize?scope=openid%20email%20https://www.googleapis.com/auth/gmail.readonly"
+    url: "https://authorize.semblance.local/authorize?scope=openid%20email%20https://www.googleapis.com/auth/gmail.readonly"
   });
   if (!hit || hit.kind !== "authorize" || hit.tabId !== 7) {
     errors.push("main-frame authorize should store a per-tab decode");
@@ -1515,7 +1528,7 @@ async function checkWatch() {
       errors.push("session record should keep the decoded map");
     }
   }
-  const again = await live.onUrl(7, "https://example.com/authorize?scope=openid%20email%20https://www.googleapis.com/auth/gmail.readonly");
+  const again = await live.onUrl(7, "https://authorize.semblance.local/authorize?scope=openid%20email%20https://www.googleapis.com/auth/gmail.readonly");
   if (mem.createdNotifications.length !== 1) {
     errors.push("same fingerprint must not spam notifications");
   }
@@ -1524,7 +1537,7 @@ async function checkWatch() {
   }
 
   mem.createdNotifications.length = 0;
-  const device = await live.onUrl(8, "https://example.com/devicelogin");
+  const device = await live.onUrl(8, "https://authorize.semblance.local/devicelogin");
   if (!device || device.kind !== "device") {
     errors.push("device-login URL should store a nudge");
   }
@@ -1546,7 +1559,7 @@ async function checkWatch() {
     }
   }
 
-  const kept = await live.onUrl(7, "https://example.com/after-consent");
+  const kept = await live.onUrl(7, "https://authorize.semblance.local/after-consent");
   if (!kept || kept.kind !== "authorize") {
     errors.push("same-host navigation should keep the Allow map");
   }
@@ -1558,7 +1571,7 @@ async function checkWatch() {
     errors.push("cleared tab must drop the badge");
   }
 
-  const secretStay = await live.onUrl(9, "https://example.com/callback?code=notarealcode&scope=email");
+  const secretStay = await live.onUrl(9, "https://authorize.semblance.local/callback?code=notarealcode&scope=email");
   if (secretStay) {
     errors.push("code= URLs must not be stored as live allows");
   }
