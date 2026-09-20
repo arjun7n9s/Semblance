@@ -77,6 +77,21 @@ Beat B carries a sticky banner: **FAKE — not Google/Microsoft**. Allow still g
 
 Close every demo tab. The side panel is still the product.
 
+## Chrome Web Store
+
+Load unpacked is enough to use Semblance. To pack a store zip (runtime files only):
+
+```bash
+node scripts/pack-store.mjs
+```
+
+Writes `dist/semblance-store.zip` — manifest, background, shared, popup, side panel, content, icons, and the labeled demo pages. Leaves out `docs/`, scripts, markdown, `.git`, and soak folders. The zip does not inject into a live identity provider.
+
+- Listing draft (short + detailed copy, category, permissions, single purpose): [STORE.md](STORE.md)
+- Privacy policy to host: [PRIVACY.md](PRIVACY.md)
+
+Chrome Web Store needs a **public HTTPS URL** for the privacy policy. `PRIVACY.md` in this repo is the source. Publish it (GitHub Pages or a raw GitHub URL) before you submit. There is no separate Semblance privacy host.
+
 ## What we refuse
 
 - No content scripts on `accounts.google.com`, Microsoft login, or any live identity provider

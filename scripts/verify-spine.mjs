@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -8,7 +9,13 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), "utf8");
 
 function walkFiles(dir, acc = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name === ".git" || entry.name === "node_modules") {
+    if (
+      entry.name === ".git" ||
+      entry.name === "node_modules" ||
+      entry.name === "dist" ||
+      entry.name === "soak" ||
+      entry.name.startsWith("soak")
+    ) {
       continue;
     }
     const full = path.join(dir, entry.name);
@@ -874,6 +881,80 @@ if (/Maya|friend-shaped message is the trust fall/i.test(readmeLead)) {
 if (!/Continue with Google/i.test(readmeLead) || !/device-login code/i.test(readmeLead)) {
   errors.push("README lead must name the consent family, not a single skit");
 }
+if (!/## Chrome Web Store/.test(read("README.md")) || !/pack-store\.mjs/.test(read("README.md"))) {
+  errors.push("README must document the Chrome Web Store pack script");
+}
+if (!/STORE\.md/.test(read("README.md")) || !/PRIVACY\.md/.test(read("README.md"))) {
+  errors.push("README must link STORE.md and PRIVACY.md");
+}
+if (!/dist\/semblance-store\.zip/.test(read("README.md")) || !/dist\/semblance-store\.zip/.test(read("STORE.md"))) {
+  errors.push("README and STORE.md must name dist/semblance-store.zip");
+}
+
+const storeMd = read("STORE.md");
+const privacyMd = read("PRIVACY.md");
+const shortDesc = (storeMd.match(/```text\n([\s\S]*?)\n```/) || [])[1] || "";
+if (!shortDesc) {
+  errors.push("STORE.md must include a ```text short description");
+} else if (shortDesc.length > 132) {
+  errors.push("STORE.md short description exceeds 132 characters (" + shortDesc.length + ")");
+}
+if (!/## Single purpose/i.test(storeMd) || !/auth-code handoff/i.test(storeMd) || !/MFA never runs/i.test(storeMd)) {
+  errors.push("STORE.md single purpose must be the OAuth consent / auth-code handoff coach");
+}
+if (!/\*\*Productivity\*\*/.test(storeMd)) {
+  errors.push("STORE.md must pick Productivity as the CWS category");
+}
+if (
+  !/`alarms`/.test(storeMd) ||
+  !/`notifications`/.test(storeMd) ||
+  !/`sidePanel`/.test(storeMd) ||
+  !/`storage`/.test(storeMd) ||
+  !/`tabs`/.test(storeMd) ||
+  !/`webNavigation`/.test(storeMd)
+) {
+  errors.push("STORE.md must name each manifest permission in the justification");
+}
+if (!/detect/i.test(storeMd) || !/decode/i.test(storeMd) || !/coach/i.test(storeMd) || !/revoke door/i.test(storeMd)) {
+  errors.push("STORE.md claims must stay on detect / decode / coach / revoke door");
+}
+if (!/does not inject/i.test(storeMd) || !/live identity provider/i.test(storeMd)) {
+  errors.push("STORE.md must refuse live IdP inject");
+}
+if (!/URL only/i.test(privacyMd) || !/webNavigation/.test(privacyMd) || !/authorize/i.test(privacyMd) || !/device-login/i.test(privacyMd)) {
+  errors.push("PRIVACY.md must say tabs/webNavigation see URL only for authorize/device patterns");
+}
+if (!/no Semblance servers/i.test(privacyMd) && !/there are no Semblance servers/i.test(privacyMd)) {
+  errors.push("PRIVACY.md must say local-first with no Semblance servers");
+}
+if (!/No account/i.test(privacyMd) || !/liveAllows/.test(privacyMd) || !/friendWord/.test(privacyMd) || !/revokeRemind/.test(privacyMd) || !/reasonLog/.test(privacyMd)) {
+  errors.push("PRIVACY.md must list local storage contents and no-account");
+}
+if (!/public HTTPS URL/i.test(privacyMd) || !/GitHub Pages/i.test(privacyMd)) {
+  errors.push("PRIVACY.md must tell submitters to host a public URL (GitHub Pages or raw)");
+}
+if (!/does not block phishing/i.test(storeMd) || !/does not monitor accounts/i.test(storeMd) || !/does not freeze/i.test(storeMd)) {
+  errors.push("STORE.md must disclaim phishing-block, account monitoring, and live Allow freeze");
+}
+const storeCopyBan =
+  /\bblocks phishing\b|\bphishing protection\b|\banti-?phishing\b|\bmonitors accounts\b|\baccount monitoring\b|\bfreezes (the )?live Allow\b|\binjects into (the )?live (login|identity|IdP)/i;
+for (const rel of ["STORE.md", "PRIVACY.md", "README.md"]) {
+  const text = read(rel);
+  if (storeCopyBan.test(text)) {
+    errors.push("forbidden store claim in " + rel);
+  }
+}
+
+const packSrc = read("scripts/pack-store.mjs");
+if (!/dist\/semblance-store\.zip/.test(packSrc) || !/RUNTIME_ROOTS/.test(packSrc)) {
+  errors.push("pack-store.mjs must zip runtime roots to dist/semblance-store.zip");
+}
+if (!/docs/.test(packSrc) || !/soak/.test(packSrc) || !/\.git/.test(packSrc)) {
+  errors.push("pack-store.mjs must exclude docs, soak, and .git");
+}
+if (!/host_permissions/.test(packSrc) || !/file:/.test(packSrc)) {
+  errors.push("pack-store.mjs must freeze: no host_permissions, content_scripts file:// only");
+}
 
 const forbiddenVoice = /TLN|Tech Literacy Network|Devpost|hackathon|contest|competition/i;
 const liveIdpHref = /https?:\/\/(accounts\.google\.com|login\.microsoftonline\.com|login\.live\.com)/i;
@@ -1425,6 +1506,49 @@ try {
   await checkWatch();
 } catch (err) {
   errors.push("spine runtime check failed: " + err.message);
+}
+
+const pack = spawnSync(process.execPath, [path.join(root, "scripts/pack-store.mjs")], {
+  cwd: root,
+  encoding: "utf8"
+});
+if (pack.status !== 0) {
+  errors.push("pack-store failed:\n" + (pack.stderr || pack.stdout || "exit " + pack.status));
+} else {
+  const zipPath = path.join(root, "dist/semblance-store.zip");
+  if (!fs.existsSync(zipPath)) {
+    errors.push("pack-store must write dist/semblance-store.zip");
+  } else {
+    const listing = spawnSync(
+      "python3",
+      ["-c", "import sys, zipfile\nprint('\\n'.join(zipfile.ZipFile(sys.argv[1]).namelist()))", zipPath],
+      { encoding: "utf8" }
+    );
+    const names = String(listing.stdout || "")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    if (!names.includes("manifest.json")) {
+      errors.push("store zip must have manifest.json at the root");
+    }
+    if (!names.includes("icons/icon128.png") || !names.includes("icons/icon48.png") || !names.includes("icons/icon16.png")) {
+      errors.push("store zip must include CWS icons 16/48/128");
+    }
+    if (!names.includes("demo/allow.html") || !names.includes("shared/watch.js")) {
+      errors.push("store zip must include demo pages and live watch (still referenced, no IdP inject)");
+    }
+    const leaked = names.filter(
+      (name) =>
+        name.startsWith("docs/") ||
+        name.startsWith("scripts/") ||
+        /\.md$/i.test(name) ||
+        name.startsWith(".git") ||
+        /soak/i.test(name)
+    );
+    if (leaked.length) {
+      errors.push("store zip leaked excluded paths: " + leaked.join(", "));
+    }
+  }
 }
 
 if (errors.length) {
