@@ -945,6 +945,72 @@ for (const rel of ["STORE.md", "PRIVACY.md", "README.md"]) {
   }
 }
 
+const storeShots = [
+  "docs/store/store-0-brand_33a7.png",
+  "docs/store/store-1-live-authorize-badge_40a3.png",
+  "docs/store/store-2-auto-decode_5351.png",
+  "docs/store/store-3-device-login_b541.png",
+  "docs/store/store-4-revoke-coach_777c.png",
+  "docs/store/store-5-demo-buried_ab05.png"
+];
+function pngSize(rel) {
+  const buf = fs.readFileSync(path.join(root, rel));
+  if (buf.length < 24 || buf.toString("ascii", 1, 4) !== "PNG") {
+    return null;
+  }
+  return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+}
+for (const rel of storeShots) {
+  if (!fs.existsSync(path.join(root, rel))) {
+    errors.push("missing store screenshot " + rel);
+    continue;
+  }
+  const size = pngSize(rel);
+  if (!size || size.width !== 1280 || size.height !== 800) {
+    errors.push(rel + " must be 1280×800 PNG");
+  }
+  if (!storeMd.includes(path.posix.basename(rel))) {
+    errors.push("STORE.md Screenshots section must name " + path.posix.basename(rel));
+  }
+}
+if (!/## Screenshots/.test(storeMd) || !/at most 5/.test(storeMd) || !/1280/.test(storeMd)) {
+  errors.push("STORE.md must document screenshot upload order (1280×800, CWS cap 5)");
+}
+
+const privacyHtmlPath = path.join(root, "docs/privacy/index.html");
+if (!fs.existsSync(privacyHtmlPath)) {
+  errors.push("missing public privacy HTML at docs/privacy/index.html");
+} else {
+  const privacyHtml = read("docs/privacy/index.html");
+  if (!/local-first/i.test(privacyHtml) || !/no Semblance servers/i.test(privacyHtml)) {
+    errors.push("privacy HTML must say local-first with no Semblance servers");
+  }
+  if (!/URL only/i.test(privacyHtml) || !/webNavigation/.test(privacyHtml) || !/authorize/i.test(privacyHtml) || !/device-login/i.test(privacyHtml)) {
+    errors.push("privacy HTML must say tabs/webNavigation see URL only for authorize/device patterns");
+  }
+  if (!/does not block phishing/i.test(privacyHtml) || !/does not monitor accounts/i.test(privacyHtml)) {
+    errors.push("privacy HTML must refuse phishing-block and account monitoring");
+  }
+  if (!/liveAllows/.test(privacyHtml) || !/friendWord/.test(privacyHtml) || !/revokeRemind/.test(privacyHtml) || !/reasonLog/.test(privacyHtml)) {
+    errors.push("privacy HTML must list local storage keys");
+  }
+  if (storeCopyBan.test(privacyHtml) || /https?:\/\/(accounts\.google\.com|login\.microsoftonline\.com|login\.live\.com)/i.test(privacyHtml)) {
+    errors.push("privacy HTML must not claim phishing-block/monitoring or link a live IdP");
+  }
+}
+if (!fs.existsSync(path.join(root, "docs/privacy/.nojekyll"))) {
+  errors.push("docs/privacy/.nojekyll must exist so GitHub Pages serves the HTML as-is");
+}
+
+const pagesPrivacyUrl = "https://arjun7n9s.github.io/Semblance/privacy/";
+const rawPrivacyUrl = "https://raw.githubusercontent.com/arjun7n9s/Semblance/main/PRIVACY.md";
+for (const rel of ["STORE.md", "README.md"]) {
+  const text = read(rel);
+  if (!text.includes(pagesPrivacyUrl) || !text.includes(rawPrivacyUrl)) {
+    errors.push(rel + " must document preferred Pages privacy URL and interim raw PRIVACY.md");
+  }
+}
+
 const packSrc = read("scripts/pack-store.mjs");
 if (!/dist\/semblance-store\.zip/.test(packSrc) || !/RUNTIME_ROOTS/.test(packSrc)) {
   errors.push("pack-store.mjs must zip runtime roots to dist/semblance-store.zip");

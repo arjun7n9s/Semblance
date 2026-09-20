@@ -4,7 +4,7 @@ Copy for the Developer Dashboard. Not a live listing.
 
 Claims stay on **detect / decode / coach / revoke door / literacy**. Semblance does not block phishing, monitor accounts, or freeze a live Allow screen. Semblance does not inject into a live identity provider.
 
-Pack the zip with `node scripts/pack-store.mjs` → `dist/semblance-store.zip`. Runtime files only. See [PRIVACY.md](PRIVACY.md) for the privacy policy to host.
+Pack the zip with `node scripts/pack-store.mjs` → `dist/semblance-store.zip`. Runtime files only. Privacy policy source: [PRIVACY.md](PRIVACY.md). Public HTML: [docs/privacy/index.html](docs/privacy/index.html).
 
 ## Name
 
@@ -105,7 +105,30 @@ Use [PRIVACY.md](PRIVACY.md) as the public policy. For the CWS privacy form:
 
 ## Privacy policy URL
 
-CWS requires a **public HTTPS URL**. This repo’s [PRIVACY.md](PRIVACY.md) is the source of truth. Host it before submit — GitHub Pages or a raw GitHub URL is enough. Do not invent a fake Semblance privacy host.
+CWS requires a **public HTTPS URL**. [PRIVACY.md](PRIVACY.md) is the source of truth. The public HTML copy is [docs/privacy/index.html](docs/privacy/index.html) (`docs/privacy/.nojekyll` so Pages does not run Jekyll on it).
+
+- **Preferred:** https://arjun7n9s.github.io/Semblance/privacy/
+- **Interim:** https://raw.githubusercontent.com/arjun7n9s/Semblance/main/PRIVACY.md
+
+Enable GitHub Pages from **main** / **docs** if that first URL 404s: repo **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch `main` / folder `/docs` → Save**. One click. A `gh api` Pages create from CI/agent tokens is expected to 403 without admin. Do not invent a fake Semblance privacy host.
+
+## Screenshots
+
+Chrome Web Store wants **1280×800** PNG (or 640×400). The six files in [`docs/store/`](docs/store/) are 1280×800. They are **not** inside `dist/semblance-store.zip`. Do not upload a live Google or Microsoft login screen.
+
+The dashboard accepts **at most 5** screenshots. Upload in this order (1 is first in the listing carousel). Filename prefix is the order.
+
+| Upload | File | Caption on the frame |
+| --- | --- | --- |
+| 1 | [`store-0-brand_33a7.png`](docs/store/store-0-brand_33a7.png) | Brand — Pause at Allow. |
+| 2 | [`store-1-live-authorize-badge_40a3.png`](docs/store/store-1-live-authorize-badge_40a3.png) | Live authorize URL — toolbar badge, no paste |
+| 3 | [`store-2-auto-decode_5351.png`](docs/store/store-2-auto-decode_5351.png) | Coach opens with scopes already decoded |
+| 4 | [`store-3-device-login_b541.png`](docs/store/store-3-device-login_b541.png) | Device-login handoff nudge |
+| 5 | [`store-4-revoke-coach_777c.png`](docs/store/store-4-revoke-coach_777c.png) | Revoke door — check-in off by default |
+
+Sixth frame — keep in the repo. Swap it into slot 4 or 5 if you need theater-last instead of the device overlay or the revoke door:
+
+| — | [`store-5-demo-buried_ab05.png`](docs/store/store-5-demo-buried_ab05.png) | Demo theater buried — product path first |
 
 ## Package
 
@@ -115,7 +138,7 @@ node scripts/pack-store.mjs
 
 Writes `dist/semblance-store.zip` with `manifest.json` at the zip root. Includes the labeled demo pages because the toolbar popup still opens them. Excludes `docs/`, `scripts/`, markdown, `.git`, soak folders, and transcripts.
 
-Icons at 16 / 48 / 128 (and 32) ship in `icons/`. Store screenshots can be cropped from `docs/readme/`; those images are **not** inside the zip.
+Icons at 16 / 48 / 128 (and 32) ship in `icons/`. Store screenshots live in `docs/store/` (see Screenshots). Those images are **not** inside the zip.
 
 ## What this listing must not say
 
